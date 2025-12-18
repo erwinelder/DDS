@@ -9,6 +9,7 @@ import com.docta.dds.presentation.route.configureRouting
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import org.koin.ktor.ext.get
 
 fun main() {
     embeddedServer(
@@ -24,5 +25,8 @@ fun Application.module() {
     configureHTTP()
     configureStatusPages()
     configureDI(mainModule)
-    configureRouting()
+    configureRouting(
+        restController = get(),
+        service = get()
+    )
 }

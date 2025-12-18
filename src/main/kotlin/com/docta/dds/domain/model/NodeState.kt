@@ -21,23 +21,11 @@ object NodeState {
     fun initializeNodeId() {
         if (nodeId == null) nodeId = Uuid.random()
     }
-    fun getNodeId(): String {
-        return nodeId?.toString() ?: "null"
-    }
+    fun getNodeId(): String = nodeId?.toString() ?: ""
+    fun getNodeIdOrNull(): String? = nodeId?.toString()
 
     fun isRegistered(): Boolean = nodeId != null
 
-
-    fun replaceNeighbor(current: String, new: String): Boolean {
-        if (successorAddress == current) {
-            successorAddress = new
-            return true
-        } else if (predecessorAddress == current) {
-            predecessorAddress = new
-            return true
-        }
-        return false
-    }
 
     fun setSuccessor(address: String) {
         successorAddress = address

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "com.docta.dds"
 version = "0.0.1"
 
@@ -38,4 +40,14 @@ dependencies {
     // Utilities
     implementation(libs.kotlinx.datetime)
     implementation(libs.logback.classic)
+    // Test
+    testImplementation(kotlin("test"))
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.koin.test)
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.set(listOf("-Xcontext-parameters"))
+    }
 }
