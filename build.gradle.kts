@@ -33,6 +33,8 @@ dependencies {
     // Koin
     implementation(libs.koin.ktor)
     implementation(libs.koin.logger.slf4j)
+    // dRPC
+    implementation(libs.drpc)
     // Utilities
     implementation(libs.kotlinx.datetime)
     implementation(libs.logback.classic)

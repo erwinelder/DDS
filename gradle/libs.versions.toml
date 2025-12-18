@@ -3,6 +3,8 @@
 ktor-version = "3.3.2"
 # Koin
 koin-version = "4.1.0"
+# dRPC
+drpc-version = "0.2.5"
 # Utilities
 kotlinx-serialization-json-version = "1.9.0"
 kotlinx-datetime-version = "0.7.1"
@@ -28,6 +30,8 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 # Koin
 koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin-version" }
 koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin-version" }
+# dRPC
+drpc = { group = "io.github.erwinelder", name = "drpc", version.ref = "drpc-version" }
 # Utilities
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
