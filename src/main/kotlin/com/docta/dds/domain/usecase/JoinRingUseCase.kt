@@ -5,6 +5,6 @@ import com.docta.drpc.core.result.SimpleResult
 
 interface JoinRingUseCase {
 
-    fun execute(nextNeighborAddress: String, prevNeighborAddress: String): SimpleResult<Error>
+    suspend fun execute(greeterIpAddress: String): SimpleResult<Error>
 
 }

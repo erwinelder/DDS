@@ -12,6 +12,7 @@ interface NodeService {
     context(ctx: DrpcContext)
     suspend fun getState(): ResultData<NodeStateDto, Error>
 
+
     context(ctx: DrpcContext)
     suspend fun join(greeterIpAddress: String): SimpleResult<Error>
 

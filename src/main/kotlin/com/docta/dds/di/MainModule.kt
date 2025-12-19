@@ -1,8 +1,10 @@
 package com.docta.dds.di
 
 import com.docta.dds.domain.model.NodeState
-import com.docta.dds.domain.usecase.RequestNodeRegistrationUseCase
-import com.docta.dds.domain.usecase.RequestNodeRegistrationUseCaseImpl
+import com.docta.dds.domain.usecase.JoinRingUseCase
+import com.docta.dds.domain.usecase.JoinRingUseCaseImpl
+import com.docta.dds.domain.usecase.RegisterNodeUseCase
+import com.docta.dds.domain.usecase.RegisterNodeUseCaseImpl
 import com.docta.dds.domain.usecase.RequestReplaceNodePredecessorUseCase
 import com.docta.dds.domain.usecase.RequestReplaceNodePredecessorUseCaseImpl
 import com.docta.dds.presentation.controller.NodeRestController
@@ -34,8 +36,18 @@ val mainModule = module {
 
     /* ---------- Use Cases ---------- */
 
-    single<RequestNodeRegistrationUseCase> {
-        RequestNodeRegistrationUseCaseImpl(client = get())
+    single<JoinRingUseCase> {
+        JoinRingUseCaseImpl(
+            client = get(),
+            nodeState = get()
+        )
+    }
+
+    single<RegisterNodeUseCase> {
+        RegisterNodeUseCaseImpl(
+            nodeState = get(),
+            requestReplaceNodePredecessorUseCase = get()
+        )
     }
 
     single<RequestReplaceNodePredecessorUseCase> {
@@ -47,8 +59,8 @@ val mainModule = module {
     single<NodeService> {
         NodeServiceImpl(
             nodeState = get(),
-            requestNodeRegistrationUseCase = get(),
-            requestReplaceNodePredecessorUseCase = get()
+            joinRingUseCase = get(),
+            registerNodeUseCase = get()
         )
     }
 
