@@ -24,7 +24,8 @@ class NodeServiceImpl(
             nodeId = nodeState.getNodeIdOrNull(),
             isLeader = nodeState.isLeader,
             successorAddress = nodeState.successorAddress,
-            predecessorAddress = nodeState.predecessorAddress
+            predecessorAddress = nodeState.predecessorAddress,
+            predecessorOfPredecessorAddress = nodeState.prePredecessorAddress
         )
         return ResultData.Success(data = nodeState)
     }
@@ -44,8 +45,33 @@ class NodeServiceImpl(
     }
 
     context(ctx: DrpcContext)
+    override suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error> {
+        val newIpAddress = newIpAddress.ifBlank {
+            ctx.asRoutingContext().call.request.origin.remoteAddress
+        }
+
+        if (nodeState.prePredecessorAddress == nodeState.successorAddress) {
+            nodeState.setPrePredecessor(address = null)
+        }
+        nodeState.setSuccessor(address = newIpAddress)
+
+        return ResultData.Success(data = nodeState.predecessorAddress)
+    }
+
+    context(ctx: DrpcContext)
     override suspend fun replacePredecessor(newIpAddress: String): SimpleResult<Error> {
+        val ctx = ctx.asRoutingContext()
+        val currPredecessorAddress = ctx.call.request.origin.remoteAddress
+
         nodeState.setPredecessor(address = newIpAddress)
+        nodeState.setPrePredecessor(address = currPredecessorAddress)
+
+        return SimpleResult.Success()
+    }
+
+
+    context(ctx: DrpcContext)
+    override suspend fun isAlive(): SimpleResult<Error> {
         return SimpleResult.Success()
     }
 

@@ -20,6 +20,7 @@ class NodeRestControllerImpl(
         url = absoluteUrl + getStatePath
     )
 
+
     context(ctx: DrpcContext)
     override suspend fun join(greeterIpAddress: String): SimpleResult<Error> = client.callPost(
         url = absoluteUrl + joinPath,
@@ -32,11 +33,25 @@ class NodeRestControllerImpl(
     )
 
     context(ctx: DrpcContext)
+    override suspend fun replaceSuccessor(
+        newIpAddress: String
+    ): ResultData<String?, Error> = client.callPost(
+        url = absoluteUrl + replaceSuccessorPath,
+        newIpAddress.asCallParameter()
+    )
+
+    context(ctx: DrpcContext)
     override suspend fun replacePredecessor(
         newIpAddress: String
     ): SimpleResult<Error> = client.callPost(
         url = absoluteUrl + replacePredecessorPath,
         newIpAddress.asCallParameter()
+    )
+
+
+    context(ctx: DrpcContext)
+    override suspend fun isAlive(): SimpleResult<Error> = client.callPost(
+        url = absoluteUrl + isAlivePath
     )
 
 }

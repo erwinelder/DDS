@@ -16,6 +16,8 @@ object NodeState {
         private set
     var predecessorAddress: String? = null
         private set
+    var prePredecessorAddress: String? = null
+        private set
 
 
     fun initializeNodeId() {
@@ -27,11 +29,25 @@ object NodeState {
     fun isRegistered(): Boolean = nodeId != null
 
 
-    fun setSuccessor(address: String) {
+    fun setIsLeader(isLeader: Boolean) {
+        this.isLeader = isLeader
+    }
+
+
+    fun setSuccessor(address: String?) {
         successorAddress = address
     }
-    fun setPredecessor(address: String) {
+    fun setPredecessor(address: String?) {
         predecessorAddress = address
+    }
+    fun setPrePredecessor(address: String?) {
+        prePredecessorAddress = address
+    }
+
+    fun resetAllNeighbors() {
+        successorAddress = null
+        predecessorAddress = null
+        prePredecessorAddress = null
     }
 
 
@@ -44,6 +60,7 @@ object NodeState {
         initializeNodeId()
         successorAddress = registrationState.successorIpAddress
         predecessorAddress = registrationState.predecessorIpAddress
+        prePredecessorAddress = registrationState.predecessorOfPredecessorIpAddress
     }
 
 }

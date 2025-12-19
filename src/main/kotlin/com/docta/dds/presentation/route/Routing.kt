@@ -17,6 +17,7 @@ fun Application.configureRouting(
                 service.getState()
             }
 
+
             processPostRoute(restController.joinPath) {
                 service.join(greeterIpAddress = get(0))
             }
@@ -25,8 +26,17 @@ fun Application.configureRouting(
                 service.registerNode()
             }
 
+            processPostRoute(restController.replaceSuccessorPath) {
+                service.replaceSuccessor(newIpAddress = get(0))
+            }
+
             processPostRoute(restController.replacePredecessorPath) {
                 service.replacePredecessor(newIpAddress = get(0))
+            }
+
+
+            processPostRoute(restController.isAlivePath) {
+                service.isAlive()
             }
 
         }

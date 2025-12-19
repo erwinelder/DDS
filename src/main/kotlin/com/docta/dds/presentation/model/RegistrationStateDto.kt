@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RegistrationStateDto(
     val successorIpAddress: String? = null,
-    val predecessorIpAddress: String? = null
+    val predecessorIpAddress: String? = null,
+    val predecessorOfPredecessorIpAddress: String? = null
 ) {
 
     fun replaceNeighborIpAddressesIfNull(newAddress: String): RegistrationStateDto {
@@ -14,7 +15,8 @@ data class RegistrationStateDto(
 
         return RegistrationStateDto(
             successorIpAddress = successorIpAddress,
-            predecessorIpAddress = predecessorIpAddress
+            predecessorIpAddress = predecessorIpAddress,
+            predecessorOfPredecessorIpAddress = predecessorOfPredecessorIpAddress
         )
     }
 

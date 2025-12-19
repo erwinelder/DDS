@@ -20,6 +20,13 @@ interface NodeService {
     suspend fun registerNode(): ResultData<RegistrationStateDto, Error>
 
     context(ctx: DrpcContext)
+    suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error>
+
+    context(ctx: DrpcContext)
     suspend fun replacePredecessor(newIpAddress: String): SimpleResult<Error>
+
+
+    context(ctx: DrpcContext)
+    suspend fun isAlive(): SimpleResult<Error>
 
 }

@@ -14,26 +14,31 @@ class RegisterNodeUseCaseImpl(
     override suspend fun execute(newNodeAddress: String): ResultData<RegistrationStateDto, Error> {
         if (!nodeState.isRegistered()) return ResultData.Error(Error.NodeIsNotRegisteredYet)
 
-        val neighborAddress = nodeState.successorAddress
+        val successorAddress = nodeState.successorAddress
 
-        if (neighborAddress != null) {
+        return if (successorAddress != null) {
             val result = requestReplaceNodePredecessorUseCase.execute(
-                targetNodeIpAddress = neighborAddress, newIpAddress = newNodeAddress
+                targetNodeIpAddress = successorAddress, newIpAddress = newNodeAddress
             )
 
             when (result) {
                 is SimpleResult.Success -> {
-                    val registrationState = RegistrationStateDto(successorIpAddress = neighborAddress)
+                    val registrationState = RegistrationStateDto(
+                        successorIpAddress = successorAddress,
+                        predecessorOfPredecessorIpAddress = nodeState.predecessorAddress
+                    )
                     nodeState.setSuccessor(address = newNodeAddress)
-                    return ResultData.Success(data = registrationState)
+                    nodeState.setPrePredecessor(address = newNodeAddress)
+
+                    ResultData.Success(data = registrationState)
                 }
-                is SimpleResult.Error -> return ResultData.Error(result.error)
+                is SimpleResult.Error -> ResultData.Error(result.error)
             }
         } else {
             nodeState.setSuccessor(address = newNodeAddress)
             nodeState.setPredecessor(address = newNodeAddress)
 
-            return ResultData.Success(data = RegistrationStateDto())
+            ResultData.Success(data = RegistrationStateDto())
         }
     }
 

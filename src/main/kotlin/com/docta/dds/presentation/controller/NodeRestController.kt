@@ -16,13 +16,21 @@ interface NodeRestController : NodeService {
     val getStatePath: String
         get() = "/getState"
 
+
     val joinPath: String
         get() = "/join"
 
     val registerNodePath: String
         get() = "/registerNode"
 
+    val replaceSuccessorPath: String
+        get() = "/replaceSuccessor"
+
     val replacePredecessorPath: String
         get() = "/replacePredecessor"
+
+
+    val isAlivePath: String
+        get() = "/isAlive"
 
 }

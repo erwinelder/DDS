@@ -1,12 +1,19 @@
 package com.docta.dds.di
 
+import com.docta.dds.domain.model.AppContext
 import com.docta.dds.domain.model.NodeState
+import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCase
+import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCaseImpl
 import com.docta.dds.domain.usecase.JoinRingUseCase
 import com.docta.dds.domain.usecase.JoinRingUseCaseImpl
+import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCase
+import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCaseImpl
 import com.docta.dds.domain.usecase.RegisterNodeUseCase
 import com.docta.dds.domain.usecase.RegisterNodeUseCaseImpl
 import com.docta.dds.domain.usecase.RequestReplaceNodePredecessorUseCase
 import com.docta.dds.domain.usecase.RequestReplaceNodePredecessorUseCaseImpl
+import com.docta.dds.domain.usecase.RequestReplaceNodeSuccessorUseCase
+import com.docta.dds.domain.usecase.RequestReplaceNodeSuccessorUseCaseImpl
 import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
@@ -21,6 +28,10 @@ import org.koin.dsl.module
 val mainModule = module {
 
     /* ---------- Other ---------- */
+
+    single {
+        AppContext
+    }
 
     single {
         NodeState
@@ -50,8 +61,24 @@ val mainModule = module {
         )
     }
 
+    single<RequestReplaceNodeSuccessorUseCase> {
+        RequestReplaceNodeSuccessorUseCaseImpl(client = get())
+    }
     single<RequestReplaceNodePredecessorUseCase> {
         RequestReplaceNodePredecessorUseCaseImpl(client = get())
+    }
+
+    single<CheckPredecessorIsAliveUseCase> {
+        CheckPredecessorIsAliveUseCaseImpl(
+            client = get(),
+            nodeState = get()
+        )
+    }
+    single<RecoverFromPredecessorDeathUseCase> {
+        RecoverFromPredecessorDeathUseCaseImpl(
+            nodeState = get(),
+            requestReplaceNodeSuccessorUseCase = get()
+        )
     }
 
     /* ---------- Services ---------- */

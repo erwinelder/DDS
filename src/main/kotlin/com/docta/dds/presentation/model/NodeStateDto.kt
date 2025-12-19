@@ -7,5 +7,6 @@ data class NodeStateDto(
     val nodeId: String?,
     val isLeader: Boolean,
     val successorAddress: String?,
-    val predecessorAddress: String?
+    val predecessorAddress: String?,
+    val predecessorOfPredecessorAddress: String?
 )
