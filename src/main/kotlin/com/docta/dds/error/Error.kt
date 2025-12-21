@@ -9,5 +9,6 @@ sealed class Error {
 
     @Serializable object NodeIsAlreadyRegistered : Error()
     @Serializable object NodeIsNotRegisteredYet : Error()
+    @Serializable object RingConsistsOnlyOfOneNode : Error()
 
 }

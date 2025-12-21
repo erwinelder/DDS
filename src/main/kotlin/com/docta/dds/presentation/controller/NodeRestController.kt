@@ -16,6 +16,9 @@ interface NodeRestController : NodeService {
     val getStatePath: String
         get() = "/getState"
 
+    val isAlivePath: String
+        get() = "/isAlive"
+
 
     val joinPath: String
         get() = "/join"
@@ -30,7 +33,7 @@ interface NodeRestController : NodeService {
         get() = "/replacePredecessor"
 
 
-    val isAlivePath: String
-        get() = "/isAlive"
+    val proclaimLeaderPath: String
+        get() = "/proclaimLeader"
 
 }

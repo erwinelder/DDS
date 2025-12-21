@@ -6,6 +6,8 @@ import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCase
 import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCaseImpl
 import com.docta.dds.domain.usecase.JoinRingUseCase
 import com.docta.dds.domain.usecase.JoinRingUseCaseImpl
+import com.docta.dds.domain.usecase.ProclaimLeaderUseCase
+import com.docta.dds.domain.usecase.ProclaimLeaderUseCaseImpl
 import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCase
 import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCaseImpl
 import com.docta.dds.domain.usecase.RegisterNodeUseCase
@@ -77,7 +79,15 @@ val mainModule = module {
     single<RecoverFromPredecessorDeathUseCase> {
         RecoverFromPredecessorDeathUseCaseImpl(
             nodeState = get(),
-            requestReplaceNodeSuccessorUseCase = get()
+            requestReplaceNodeSuccessorUseCase = get(),
+            proclaimLeaderUseCase = get()
+        )
+    }
+
+    single<ProclaimLeaderUseCase> {
+        ProclaimLeaderUseCaseImpl(
+            client = get(),
+            nodeState = get()
         )
     }
 
@@ -87,7 +97,8 @@ val mainModule = module {
         NodeServiceImpl(
             nodeState = get(),
             joinRingUseCase = get(),
-            registerNodeUseCase = get()
+            registerNodeUseCase = get(),
+            proclaimLeaderUseCase = get()
         )
     }
 

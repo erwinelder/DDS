@@ -7,12 +7,12 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 object NodeState {
 
-    var nodeId: Uuid? = null
+    var nodeUuid: Uuid? = null
         private set
     val nodeAddress: String
         get() = System.getenv("NODE_ADDRESS")
 
-    var leaderId: Uuid? = null
+    var leaderUuid: Uuid? = null
         private set
     var leaderAddress: String? = null
         private set
@@ -27,19 +27,35 @@ object NodeState {
         private set
 
 
-    fun getLeaderIdOrNull(): String? = leaderId?.toString()
-
     fun initializeNodeId() {
-        if (nodeId == null) nodeId = Uuid.random()
+        if (nodeUuid == null) nodeUuid = Uuid.random()
     }
-    fun getNodeIdOrNull(): String? = nodeId?.toString()
+    fun getNodeId(): Uuid = nodeUuid
+        ?: throw IllegalStateException("Node ID is null for node $nodeAddress")
+    fun getNodeIdString(): String = nodeUuid?.toString()
+        ?: throw IllegalStateException("Node ID is null for node $nodeAddress")
+    fun getNodeIdStringOrNull(): String? = nodeUuid?.toString()
 
-    fun isRegistered(): Boolean = nodeId != null
+    fun getLeaderId(): Uuid = leaderUuid
+        ?: throw IllegalStateException("Leader ID is null for node $nodeAddress")
+    fun getLeaderIdString(): String = leaderUuid?.toString()
+        ?: throw IllegalStateException("Leader ID is null for node $nodeAddress")
+    fun getLeaderIdStringOrNull(): String? = leaderUuid?.toString()
+
+    fun getLeaderAddressString(): String = leaderAddress
+        ?: throw IllegalStateException("Leader address is null for node $nodeAddress")
+
+    fun isRegistered(): Boolean = nodeUuid != null
 
 
-    fun proclaimNodeLeader() {
-        leaderId = nodeId
+    fun proclaimAsLeader() {
+        leaderUuid = nodeUuid
         leaderAddress = nodeAddress
+    }
+
+    fun updateLeader(leaderId: String, leaderAddress: String) {
+        this.leaderUuid = Uuid.parse(uuidString = leaderId)
+        this.leaderAddress = leaderAddress
     }
 
 
@@ -62,12 +78,12 @@ object NodeState {
 
     fun registerNode() {
         initializeNodeId()
-        proclaimNodeLeader()
+        proclaimAsLeader()
     }
 
     fun registerNode(registrationState: RegistrationStateDto) {
         initializeNodeId()
-        leaderId = registrationState.leaderId?.let { Uuid.parse(uuidString = it) }
+        leaderUuid = Uuid.parse(uuidString = registrationState.leaderId)
         leaderAddress = registrationState.leaderAddress
         successorAddress = registrationState.successorAddress
         predecessorAddress = registrationState.predecessorAddress

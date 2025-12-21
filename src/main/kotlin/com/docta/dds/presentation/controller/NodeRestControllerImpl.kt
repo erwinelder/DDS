@@ -20,6 +20,11 @@ class NodeRestControllerImpl(
         url = absoluteUrl + getStatePath
     )
 
+    context(ctx: DrpcContext)
+    override suspend fun isAlive(): SimpleResult<Error> = client.callPost(
+        url = absoluteUrl + isAlivePath
+    )
+
 
     context(ctx: DrpcContext)
     override suspend fun join(greeterIpAddress: String): SimpleResult<Error> = client.callPost(
@@ -50,8 +55,13 @@ class NodeRestControllerImpl(
 
 
     context(ctx: DrpcContext)
-    override suspend fun isAlive(): SimpleResult<Error> = client.callPost(
-        url = absoluteUrl + isAlivePath
+    override suspend fun proclaimLeader(
+        leaderId: String,
+        leaderAddress: String
+    ): SimpleResult<Error> = client.callPost(
+        url = absoluteUrl + proclaimLeaderPath,
+        leaderId.asCallParameter(),
+        leaderAddress.asCallParameter()
     )
 
 }

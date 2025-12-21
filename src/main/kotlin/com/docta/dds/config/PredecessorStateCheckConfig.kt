@@ -9,12 +9,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.ktor.ext.get
 
-fun Application.configurePredecessorStateCheck() {
+fun Application.configurePredecessorStateCheck(
+    appContext: AppContext = get(),
+    checkPredecessorIsAliveUseCase: CheckPredecessorIsAliveUseCase = get(),
+    recoverFromPredecessorDeathUseCase: RecoverFromPredecessorDeathUseCase = get()
+) {
     launch {
-        val appContext = get<AppContext>()
-        val checkPredecessorIsAliveUseCase = get<CheckPredecessorIsAliveUseCase>()
-        val recoverFromPredecessorDeathUseCase = get<RecoverFromPredecessorDeathUseCase>()
-
         while (true) {
             delay(appContext.predecessorStateCheckInterval)
             checkPredecessorIsAliveUseCase.execute().runOnError { recoverFromPredecessorDeathUseCase.execute() }

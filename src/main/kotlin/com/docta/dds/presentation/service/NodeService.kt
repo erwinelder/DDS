@@ -12,6 +12,9 @@ interface NodeService {
     context(ctx: DrpcContext)
     suspend fun getState(): ResultData<NodeStateDto, Error>
 
+    context(ctx: DrpcContext)
+    suspend fun isAlive(): SimpleResult<Error>
+
 
     context(ctx: DrpcContext)
     suspend fun join(greeterIpAddress: String): SimpleResult<Error>
@@ -27,6 +30,6 @@ interface NodeService {
 
 
     context(ctx: DrpcContext)
-    suspend fun isAlive(): SimpleResult<Error>
+    suspend fun proclaimLeader(leaderId: String, leaderAddress: String): SimpleResult<Error>
 
 }

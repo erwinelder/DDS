@@ -17,6 +17,10 @@ fun Application.configureRouting(
                 service.getState()
             }
 
+            processPostRoute(restController.isAlivePath) {
+                service.isAlive()
+            }
+
 
             processPostRoute(restController.joinPath) {
                 service.join(greeterIpAddress = get(0))
@@ -35,8 +39,8 @@ fun Application.configureRouting(
             }
 
 
-            processPostRoute(restController.isAlivePath) {
-                service.isAlive()
+            processPostRoute(restController.proclaimLeaderPath) {
+                service.proclaimLeader(leaderId = get(0), leaderAddress = get(1))
             }
 
         }
