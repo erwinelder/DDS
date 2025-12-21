@@ -14,10 +14,10 @@ class JoinRingUseCaseImpl(
     private val nodeState: NodeState
 ) : JoinRingUseCase {
 
-    override suspend fun execute(greeterIpAddress: String): SimpleResult<Error> {
+    override suspend fun execute(greeterIpAddress: String?): SimpleResult<Error> {
         if (nodeState.isRegistered()) return SimpleResult.Error(Error.NodeIsAlreadyRegistered)
 
-        if (greeterIpAddress.isBlank()) {
+        if (greeterIpAddress == null) {
             nodeState.registerNode()
             return SimpleResult.Success()
         }

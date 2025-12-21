@@ -18,7 +18,7 @@ class RecoverFromPredecessorDeathUseCaseImpl(
 
         if (prePredecessorAddress != null) {
             val newPrePredecessorAddress = requestReplaceNodeSuccessorUseCase
-                .execute(targetNodeIpAddress = prePredecessorAddress)
+                .execute(targetNodeIpAddress = prePredecessorAddress, newIpAddress = nodeState.nodeAddress)
                 .getOrElse { return SimpleResult.Error(it) }
 
             nodeState.setPredecessor(address = prePredecessorAddress)

@@ -12,13 +12,18 @@ class RequestReplaceNodePredecessorUseCaseImpl(
 ) : RequestReplaceNodePredecessorUseCase {
 
     override suspend fun execute(
-        targetNodeIpAddress: String,
-        newIpAddress: String
+        targetNodeAddress: String,
+        newPredecessorAddress: String,
+        newPrePredecessorAddress: String
     ): SimpleResult<Error> {
-        val service: NodeService = NodeRestControllerImpl(hostname = targetNodeIpAddress, client = client)
+        val service: NodeService = NodeRestControllerImpl(hostname = targetNodeAddress, client = client)
 
-        return callCatching { service.replacePredecessor(newIpAddress = newIpAddress) }
-            .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
+        return callCatching {
+            service.replacePredecessor(
+                newPredecessorAddress = newPredecessorAddress,
+                newPrePredecessorAddress = newPrePredecessorAddress
+            )
+        }.getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
     }
 
 }

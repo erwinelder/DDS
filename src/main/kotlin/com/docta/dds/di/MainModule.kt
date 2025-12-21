@@ -4,8 +4,12 @@ import com.docta.dds.domain.model.AppContext
 import com.docta.dds.domain.model.NodeState
 import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCase
 import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCaseImpl
+import com.docta.dds.domain.usecase.InitiateLonelinessProtocolUseCase
+import com.docta.dds.domain.usecase.InitiateLonelinessProtocolUseCaseImpl
 import com.docta.dds.domain.usecase.JoinRingUseCase
 import com.docta.dds.domain.usecase.JoinRingUseCaseImpl
+import com.docta.dds.domain.usecase.LeaveRingUseCase
+import com.docta.dds.domain.usecase.LeaveRingUseCaseImpl
 import com.docta.dds.domain.usecase.ProclaimLeaderUseCase
 import com.docta.dds.domain.usecase.ProclaimLeaderUseCaseImpl
 import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCase
@@ -63,6 +67,13 @@ val mainModule = module {
         )
     }
 
+    single<LeaveRingUseCase> {
+        LeaveRingUseCaseImpl(
+            client = get(),
+            nodeState = get()
+        )
+    }
+
     single<RequestReplaceNodeSuccessorUseCase> {
         RequestReplaceNodeSuccessorUseCaseImpl(client = get())
     }
@@ -91,6 +102,10 @@ val mainModule = module {
         )
     }
 
+    single<InitiateLonelinessProtocolUseCase> {
+        InitiateLonelinessProtocolUseCaseImpl(nodeState = get())
+    }
+
     /* ---------- Services ---------- */
 
     single<NodeService> {
@@ -98,7 +113,9 @@ val mainModule = module {
             nodeState = get(),
             joinRingUseCase = get(),
             registerNodeUseCase = get(),
-            proclaimLeaderUseCase = get()
+            leaveRingUseCase = get(),
+            proclaimLeaderUseCase = get(),
+            initiateLonelinessProtocolUseCase = get()
         )
     }
 

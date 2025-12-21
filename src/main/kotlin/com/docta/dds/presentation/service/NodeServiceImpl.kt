@@ -1,9 +1,7 @@
 package com.docta.dds.presentation.service
 
 import com.docta.dds.domain.model.NodeState
-import com.docta.dds.domain.usecase.JoinRingUseCase
-import com.docta.dds.domain.usecase.ProclaimLeaderUseCase
-import com.docta.dds.domain.usecase.RegisterNodeUseCase
+import com.docta.dds.domain.usecase.*
 import com.docta.dds.error.Error
 import com.docta.dds.presentation.model.NodeStateDto
 import com.docta.dds.presentation.model.RegistrationStateDto
@@ -13,13 +11,20 @@ import com.docta.drpc.core.result.ResultData
 import com.docta.drpc.core.result.SimpleResult
 import com.docta.drpc.core.result.onError
 import io.ktor.server.plugins.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 import kotlin.uuid.ExperimentalUuidApi
 
 class NodeServiceImpl(
     private val nodeState: NodeState,
     private val joinRingUseCase: JoinRingUseCase,
     private val registerNodeUseCase: RegisterNodeUseCase,
-    private val proclaimLeaderUseCase: ProclaimLeaderUseCase
+    private val leaveRingUseCase: LeaveRingUseCase,
+    private val proclaimLeaderUseCase: ProclaimLeaderUseCase,
+    private val initiateLonelinessProtocolUseCase: InitiateLonelinessProtocolUseCase
 ) : NodeService {
 
     context(ctx: DrpcContext)
@@ -46,7 +51,8 @@ class NodeServiceImpl(
     @OptIn(ExperimentalUuidApi::class)
     context(ctx: DrpcContext)
     override suspend fun join(greeterIpAddress: String): SimpleResult<Error> {
-        joinRingUseCase.execute(greeterIpAddress = greeterIpAddress).onError { return SimpleResult.Error(it) }
+        joinRingUseCase.execute(greeterIpAddress = greeterIpAddress.ifBlank { null })
+            .onError { return SimpleResult.Error(it) }
 
         if (nodeState.getNodeId() > nodeState.getLeaderId()) {
             proclaimLeaderUseCase
@@ -66,26 +72,35 @@ class NodeServiceImpl(
     }
 
     context(ctx: DrpcContext)
-    override suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error> {
-        val newIpAddress = newIpAddress.ifBlank {
-            ctx.asRoutingContext().call.request.origin.remoteAddress
+    override suspend fun leave(): SimpleResult<Error> {
+        leaveRingUseCase.execute().onError { return SimpleResult.Error(it) }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(1000)
+            exitProcess(0)
         }
 
+        return SimpleResult.Success()
+    }
+
+    context(ctx: DrpcContext)
+    override suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error> {
         if (nodeState.prePredecessorAddress == nodeState.successorAddress) {
             nodeState.setPrePredecessor(address = null)
         }
-        nodeState.setSuccessor(address = newIpAddress)
+        nodeState.setSuccessor(address = newIpAddress.takeIf { it != nodeState.nodeAddress })
 
         return ResultData.Success(data = nodeState.predecessorAddress)
     }
 
     context(ctx: DrpcContext)
-    override suspend fun replacePredecessor(newIpAddress: String): SimpleResult<Error> {
-        val ctx = ctx.asRoutingContext()
-        val currPredecessorAddress = ctx.call.request.origin.remoteAddress
+    override suspend fun replacePredecessor(
+        newPredecessorAddress: String,
+        newPrePredecessorAddress: String
+    ): SimpleResult<Error> {
 
-        nodeState.setPredecessor(address = newIpAddress)
-        nodeState.setPrePredecessor(address = currPredecessorAddress)
+        nodeState.setPredecessor(address = newPredecessorAddress.takeIf { it != nodeState.nodeAddress })
+        nodeState.setPrePredecessor(address = newPrePredecessorAddress.takeIf { it != nodeState.nodeAddress })
 
         return SimpleResult.Success()
     }
@@ -105,6 +120,12 @@ class NodeServiceImpl(
                 SimpleResult.Success()
             }
         }
+    }
+
+    context(ctx: DrpcContext)
+    override suspend fun initiateLonelinessProtocol(): SimpleResult<Error> {
+        initiateLonelinessProtocolUseCase.execute()
+        return SimpleResult.Success()
     }
 
 }

@@ -23,13 +23,19 @@ interface NodeService {
     suspend fun registerNode(): ResultData<RegistrationStateDto, Error>
 
     context(ctx: DrpcContext)
+    suspend fun leave(): SimpleResult<Error>
+
+    context(ctx: DrpcContext)
     suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error>
 
     context(ctx: DrpcContext)
-    suspend fun replacePredecessor(newIpAddress: String): SimpleResult<Error>
+    suspend fun replacePredecessor(newPredecessorAddress: String, newPrePredecessorAddress: String): SimpleResult<Error>
 
 
     context(ctx: DrpcContext)
     suspend fun proclaimLeader(leaderId: String, leaderAddress: String): SimpleResult<Error>
+
+    context(ctx: DrpcContext)
+    suspend fun initiateLonelinessProtocol(): SimpleResult<Error>
 
 }

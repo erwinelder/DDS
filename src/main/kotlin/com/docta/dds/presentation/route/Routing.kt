@@ -30,17 +30,25 @@ fun Application.configureRouting(
                 service.registerNode()
             }
 
+            processPostRoute(restController.leavePath) {
+                service.leave()
+            }
+
             processPostRoute(restController.replaceSuccessorPath) {
                 service.replaceSuccessor(newIpAddress = get(0))
             }
 
             processPostRoute(restController.replacePredecessorPath) {
-                service.replacePredecessor(newIpAddress = get(0))
+                service.replacePredecessor(newPredecessorAddress = get(0), newPrePredecessorAddress = get(1))
             }
 
 
             processPostRoute(restController.proclaimLeaderPath) {
                 service.proclaimLeader(leaderId = get(0), leaderAddress = get(1))
+            }
+
+            processPostRoute(restController.initiateLonelinessProtocolPath) {
+                service.initiateLonelinessProtocol()
             }
 
         }

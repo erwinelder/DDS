@@ -18,7 +18,9 @@ class RegisterNodeUseCaseImpl(
 
         return if (successorAddress != null) {
             val result = requestReplaceNodePredecessorUseCase.execute(
-                targetNodeIpAddress = successorAddress, newIpAddress = newNodeAddress
+                targetNodeAddress = successorAddress,
+                newPredecessorAddress = newNodeAddress,
+                newPrePredecessorAddress = nodeState.nodeAddress
             )
 
             when (result) {

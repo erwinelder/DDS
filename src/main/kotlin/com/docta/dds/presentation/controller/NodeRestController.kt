@@ -26,6 +26,9 @@ interface NodeRestController : NodeService {
     val registerNodePath: String
         get() = "/registerNode"
 
+    val leavePath: String
+        get() = "/leave"
+
     val replaceSuccessorPath: String
         get() = "/replaceSuccessor"
 
@@ -35,5 +38,8 @@ interface NodeRestController : NodeService {
 
     val proclaimLeaderPath: String
         get() = "/proclaimLeader"
+
+    val initiateLonelinessProtocolPath: String
+        get() = "/initiateLonelinessProtocol"
 
 }

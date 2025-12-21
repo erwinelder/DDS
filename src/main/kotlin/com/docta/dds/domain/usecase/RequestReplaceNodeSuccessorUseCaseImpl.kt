@@ -13,11 +13,11 @@ class RequestReplaceNodeSuccessorUseCaseImpl(
 
     override suspend fun execute(
         targetNodeIpAddress: String,
-        newIpAddress: String?
+        newIpAddress: String
     ): ResultData<String?, Error> {
         val service: NodeService = NodeRestControllerImpl(hostname = targetNodeIpAddress, client = client)
 
-        return callCatching { service.replaceSuccessor(newIpAddress = newIpAddress ?: "") }
+        return callCatching { service.replaceSuccessor(newIpAddress = newIpAddress) }
             .getOrElse { return ResultData.Error(Error.ServiceNotAvailable) }
     }
 

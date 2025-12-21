@@ -226,6 +226,8 @@ class NodeIntegrationTest {
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
         val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
+        var node1State: NodeStateDto
+        var node3State: NodeStateDto
 
         callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
             assertNull(actual = getErrorOrNull())
@@ -243,6 +245,7 @@ class NodeIntegrationTest {
         callCatching { service1.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
             assertNotNull(actual = data)
+            node1State = data
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
@@ -253,6 +256,7 @@ class NodeIntegrationTest {
         callCatching { service3.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
             assertNotNull(actual = data)
+            node3State = data
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp3)
@@ -260,6 +264,73 @@ class NodeIntegrationTest {
             assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
             assertNull(actual = data.predecessorOfPredecessorAddress)
         }
+
+        val expectedLeaderId = listOf(
+            node1State.nodeId!!,
+            node3State.nodeId!!
+        ).maxOrNull()!!
+
+        assertEquals(actual = node1State.isLeader, expected = node1State.nodeId == expectedLeaderId)
+        assertEquals(actual = node3State.isLeader, expected = node3State.nodeId == expectedLeaderId)
+    }
+
+    @Test
+    fun `ring reconstructs successfully after node leave`() = testApplication {
+        configureApplication()
+        startApplication()
+        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        delay(500)
+
+        val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
+        val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
+        val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
+        var node1State: NodeStateDto
+        var node3State: NodeStateDto
+
+        callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service2.join(greeterIpAddress = nodeIp1) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service3.join(greeterIpAddress = nodeIp2) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+
+        callCatching { service2.leave() }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+            node1State = data
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp1)
+            assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
+            assertNull(actual = data.predecessorOfPredecessorAddress)
+        }
+        callCatching { service3.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+            node3State = data
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp3)
+            assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
+            assertNull(actual = data.predecessorOfPredecessorAddress)
+        }
+
+        val expectedLeaderId = listOf(
+            node1State.nodeId!!,
+            node3State.nodeId!!
+        ).maxOrNull()!!
+
+        assertEquals(actual = node1State.isLeader, expected = node1State.nodeId == expectedLeaderId)
+        assertEquals(actual = node3State.isLeader, expected = node3State.nodeId == expectedLeaderId)
     }
 
 }

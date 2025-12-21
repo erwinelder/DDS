@@ -5,6 +5,6 @@ import com.docta.drpc.core.result.ResultData
 
 interface RequestReplaceNodeSuccessorUseCase {
 
-    suspend fun execute(targetNodeIpAddress: String, newIpAddress: String? = null): ResultData<String?, Error>
+    suspend fun execute(targetNodeIpAddress: String, newIpAddress: String): ResultData<String?, Error>
 
 }

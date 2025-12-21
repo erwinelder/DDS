@@ -38,6 +38,11 @@ class NodeRestControllerImpl(
     )
 
     context(ctx: DrpcContext)
+    override suspend fun leave(): SimpleResult<Error> = client.callPost(
+        url = absoluteUrl + leavePath
+    )
+
+    context(ctx: DrpcContext)
     override suspend fun replaceSuccessor(
         newIpAddress: String
     ): ResultData<String?, Error> = client.callPost(
@@ -47,10 +52,12 @@ class NodeRestControllerImpl(
 
     context(ctx: DrpcContext)
     override suspend fun replacePredecessor(
-        newIpAddress: String
+        newPredecessorAddress: String,
+        newPrePredecessorAddress: String
     ): SimpleResult<Error> = client.callPost(
         url = absoluteUrl + replacePredecessorPath,
-        newIpAddress.asCallParameter()
+        newPredecessorAddress.asCallParameter(),
+        newPrePredecessorAddress.asCallParameter()
     )
 
 
@@ -62,6 +69,11 @@ class NodeRestControllerImpl(
         url = absoluteUrl + proclaimLeaderPath,
         leaderId.asCallParameter(),
         leaderAddress.asCallParameter()
+    )
+
+    context(ctx: DrpcContext)
+    override suspend fun initiateLonelinessProtocol(): SimpleResult<Error> = client.callPost(
+        url = absoluteUrl + initiateLonelinessProtocolPath
     )
 
 }
