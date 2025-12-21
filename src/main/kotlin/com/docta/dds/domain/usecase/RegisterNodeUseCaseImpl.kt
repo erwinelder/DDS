@@ -24,8 +24,11 @@ class RegisterNodeUseCaseImpl(
             when (result) {
                 is SimpleResult.Success -> {
                     val registrationState = RegistrationStateDto(
-                        successorIpAddress = successorAddress,
-                        predecessorOfPredecessorIpAddress = nodeState.predecessorAddress
+                        leaderId = nodeState.getLeaderIdOrNull(),
+                        leaderAddress = nodeState.leaderAddress,
+                        successorAddress = successorAddress,
+                        predecessorAddress = nodeState.nodeAddress,
+                        prePredecessorAddress = nodeState.predecessorAddress
                     )
                     nodeState.setSuccessor(address = newNodeAddress)
                     nodeState.setPrePredecessor(address = newNodeAddress)
@@ -38,7 +41,14 @@ class RegisterNodeUseCaseImpl(
             nodeState.setSuccessor(address = newNodeAddress)
             nodeState.setPredecessor(address = newNodeAddress)
 
-            ResultData.Success(data = RegistrationStateDto())
+            val registrationState = RegistrationStateDto(
+                leaderId = nodeState.getLeaderIdOrNull(),
+                leaderAddress = nodeState.leaderAddress,
+                successorAddress = nodeState.nodeAddress,
+                predecessorAddress = nodeState.nodeAddress,
+                prePredecessorAddress = null
+            )
+            ResultData.Success(data = registrationState)
         }
     }
 

@@ -9,8 +9,15 @@ object NodeState {
 
     var nodeId: Uuid? = null
         private set
-    var isLeader: Boolean = false
+    val nodeAddress: String
+        get() = System.getenv("NODE_ADDRESS")
+
+    var leaderId: Uuid? = null
         private set
+    var leaderAddress: String? = null
+        private set
+    val isLeader: Boolean
+        get() = nodeAddress == leaderAddress
 
     var successorAddress: String? = null
         private set
@@ -20,17 +27,19 @@ object NodeState {
         private set
 
 
+    fun getLeaderIdOrNull(): String? = leaderId?.toString()
+
     fun initializeNodeId() {
         if (nodeId == null) nodeId = Uuid.random()
     }
-    fun getNodeId(): String = nodeId?.toString() ?: ""
     fun getNodeIdOrNull(): String? = nodeId?.toString()
 
     fun isRegistered(): Boolean = nodeId != null
 
 
-    fun setIsLeader(isLeader: Boolean) {
-        this.isLeader = isLeader
+    fun proclaimNodeLeader() {
+        leaderId = nodeId
+        leaderAddress = nodeAddress
     }
 
 
@@ -53,14 +62,16 @@ object NodeState {
 
     fun registerNode() {
         initializeNodeId()
-        isLeader = true
+        proclaimNodeLeader()
     }
 
     fun registerNode(registrationState: RegistrationStateDto) {
         initializeNodeId()
-        successorAddress = registrationState.successorIpAddress
-        predecessorAddress = registrationState.predecessorIpAddress
-        prePredecessorAddress = registrationState.predecessorOfPredecessorIpAddress
+        leaderId = registrationState.leaderId?.let { Uuid.parse(uuidString = it) }
+        leaderAddress = registrationState.leaderAddress
+        successorAddress = registrationState.successorAddress
+        predecessorAddress = registrationState.predecessorAddress
+        prePredecessorAddress = registrationState.prePredecessorAddress
     }
 
 }

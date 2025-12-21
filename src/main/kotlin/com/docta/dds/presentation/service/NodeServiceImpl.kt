@@ -22,6 +22,9 @@ class NodeServiceImpl(
     override suspend fun getState(): ResultData<NodeStateDto, Error> {
         val nodeState = NodeStateDto(
             nodeId = nodeState.getNodeIdOrNull(),
+            nodeAddress = nodeState.nodeAddress,
+            leaderId = nodeState.getLeaderIdOrNull(),
+            leaderAddress = nodeState.leaderAddress,
             isLeader = nodeState.isLeader,
             successorAddress = nodeState.successorAddress,
             predecessorAddress = nodeState.predecessorAddress,

@@ -27,7 +27,6 @@ class JoinRingUseCaseImpl(
         val registrationState = callCatching { service.registerNode() }
             .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
             .getOrElse { return SimpleResult.Error(it) }
-            .replaceNeighborIpAddressesIfNull(newAddress = greeterIpAddress)
 
         nodeState.registerNode(registrationState = registrationState)
 

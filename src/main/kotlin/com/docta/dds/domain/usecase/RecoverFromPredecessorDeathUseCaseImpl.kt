@@ -26,7 +26,7 @@ class RecoverFromPredecessorDeathUseCaseImpl(
             }
         } else {
             nodeState.resetAllNeighbors()
-            nodeState.setIsLeader(isLeader = true)
+            nodeState.proclaimNodeLeader()
         }
 
         return SimpleResult.Success()
