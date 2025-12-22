@@ -2,8 +2,8 @@ package com.docta.dds.di
 
 import com.docta.dds.domain.model.AppContext
 import com.docta.dds.domain.model.NodeState
-import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCase
-import com.docta.dds.domain.usecase.CheckPredecessorIsAliveUseCaseImpl
+import com.docta.dds.domain.usecase.CheckSuccessorIsAliveUseCase
+import com.docta.dds.domain.usecase.CheckSuccessorIsAliveUseCaseImpl
 import com.docta.dds.domain.usecase.InitiateLonelinessProtocolUseCase
 import com.docta.dds.domain.usecase.InitiateLonelinessProtocolUseCaseImpl
 import com.docta.dds.domain.usecase.JoinRingUseCase
@@ -12,14 +12,14 @@ import com.docta.dds.domain.usecase.LeaveRingUseCase
 import com.docta.dds.domain.usecase.LeaveRingUseCaseImpl
 import com.docta.dds.domain.usecase.ProclaimLeaderUseCase
 import com.docta.dds.domain.usecase.ProclaimLeaderUseCaseImpl
-import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCase
-import com.docta.dds.domain.usecase.RecoverFromPredecessorDeathUseCaseImpl
+import com.docta.dds.domain.usecase.RecoverFromSuccessorDeathUseCase
+import com.docta.dds.domain.usecase.RecoverFromSuccessorDeathUseCaseImpl
 import com.docta.dds.domain.usecase.RegisterNodeUseCase
 import com.docta.dds.domain.usecase.RegisterNodeUseCaseImpl
-import com.docta.dds.domain.usecase.RequestReplaceNodePredecessorUseCase
-import com.docta.dds.domain.usecase.RequestReplaceNodePredecessorUseCaseImpl
-import com.docta.dds.domain.usecase.RequestReplaceNodeSuccessorUseCase
-import com.docta.dds.domain.usecase.RequestReplaceNodeSuccessorUseCaseImpl
+import com.docta.dds.domain.usecase.ReplacePredecessorsUseCase
+import com.docta.dds.domain.usecase.ReplacePredecessorsUseCaseImpl
+import com.docta.dds.domain.usecase.ReplaceSuccessorsUseCase
+import com.docta.dds.domain.usecase.ReplaceSuccessorsUseCaseImpl
 import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
@@ -63,7 +63,8 @@ val mainModule = module {
     single<RegisterNodeUseCase> {
         RegisterNodeUseCaseImpl(
             nodeState = get(),
-            requestReplaceNodePredecessorUseCase = get()
+            replacePredecessorsUseCase = get(),
+            replaceSuccessorsUseCase = get()
         )
     }
 
@@ -74,24 +75,26 @@ val mainModule = module {
         )
     }
 
-    single<RequestReplaceNodeSuccessorUseCase> {
-        RequestReplaceNodeSuccessorUseCaseImpl(client = get())
+    single<ReplaceSuccessorsUseCase> {
+        ReplaceSuccessorsUseCaseImpl(client = get(), nodeState = get())
     }
-    single<RequestReplaceNodePredecessorUseCase> {
-        RequestReplaceNodePredecessorUseCaseImpl(client = get())
+    single<ReplacePredecessorsUseCase> {
+        ReplacePredecessorsUseCaseImpl(client = get(), nodeState = get())
     }
 
-    single<CheckPredecessorIsAliveUseCase> {
-        CheckPredecessorIsAliveUseCaseImpl(
+    single<CheckSuccessorIsAliveUseCase> {
+        CheckSuccessorIsAliveUseCaseImpl(
             client = get(),
             nodeState = get()
         )
     }
-    single<RecoverFromPredecessorDeathUseCase> {
-        RecoverFromPredecessorDeathUseCaseImpl(
+    single<RecoverFromSuccessorDeathUseCase> {
+        RecoverFromSuccessorDeathUseCaseImpl(
             nodeState = get(),
-            requestReplaceNodeSuccessorUseCase = get(),
-            proclaimLeaderUseCase = get()
+            replaceSuccessorsUseCase = get(),
+            replacePredecessorsUseCase = get(),
+            proclaimLeaderUseCase = get(),
+            initiateLonelinessProtocolUseCase = get()
         )
     }
 
@@ -115,7 +118,9 @@ val mainModule = module {
             registerNodeUseCase = get(),
             leaveRingUseCase = get(),
             proclaimLeaderUseCase = get(),
-            initiateLonelinessProtocolUseCase = get()
+            initiateLonelinessProtocolUseCase = get(),
+            replaceSuccessorsUseCase = get(),
+            replacePredecessorsUseCase = get()
         )
     }
 

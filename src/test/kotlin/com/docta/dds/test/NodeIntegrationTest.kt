@@ -51,9 +51,9 @@ class NodeIntegrationTest {
                 assertNull(actual = data.leaderId)
                 assertNull(actual = data.leaderAddress)
                 assertFalse(actual = data.isLeader)
+                assertNull(actual = data.grandSuccessorAddress)
                 assertNull(actual = data.successorAddress)
                 assertNull(actual = data.predecessorAddress)
-                assertNull(actual = data.predecessorOfPredecessorAddress)
             }
         }
     }
@@ -92,8 +92,8 @@ class NodeIntegrationTest {
             assertEquals(actual = data.leaderAddress, expected = nodeIp1)
             assertTrue(actual = data.isLeader)
             assertNull(actual = data.successorAddress)
+            assertNull(actual = data.grandSuccessorAddress)
             assertNull(actual = data.predecessorAddress)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
 
         callCatching { service2.join(greeterIpAddress = nodeIp1) }.getOrThrow().apply {
@@ -106,8 +106,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
             assertEquals(actual = data.successorAddress, expected = nodeIp2)
+            assertNull(actual = data.grandSuccessorAddress)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp2)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
         callCatching { service2.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
@@ -116,8 +116,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp2)
             assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertNull(actual = data.grandSuccessorAddress)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
 
         callCatching { service3.join(greeterIpAddress = nodeIp2) }.getOrThrow().apply {
@@ -130,8 +130,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
             assertEquals(actual = data.successorAddress, expected = nodeIp2)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp3)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
-            assertEquals(actual = data.predecessorOfPredecessorAddress, expected = nodeIp2)
         }
         callCatching { service2.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
@@ -140,8 +140,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp2)
             assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp1)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
-            assertEquals(actual = data.predecessorOfPredecessorAddress, expected = nodeIp3)
         }
         callCatching { service3.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
@@ -150,8 +150,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp3)
             assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp2)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp2)
-            assertEquals(actual = data.predecessorOfPredecessorAddress, expected = nodeIp1)
         }
     }
 
@@ -250,8 +250,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
             assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertNull(actual = data.grandSuccessorAddress)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
         callCatching { service3.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
@@ -261,8 +261,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp3)
             assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertNull(actual = data.grandSuccessorAddress)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
 
         val expectedLeaderId = listOf(
@@ -309,8 +309,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
             assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertNull(actual = data.grandSuccessorAddress)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
         callCatching { service3.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
@@ -320,8 +320,8 @@ class NodeIntegrationTest {
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp3)
             assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertNull(actual = data.grandSuccessorAddress)
             assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
-            assertNull(actual = data.predecessorOfPredecessorAddress)
         }
 
         val expectedLeaderId = listOf(

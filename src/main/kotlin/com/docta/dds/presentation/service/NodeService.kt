@@ -26,10 +26,10 @@ interface NodeService {
     suspend fun leave(): SimpleResult<Error>
 
     context(ctx: DrpcContext)
-    suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error>
+    suspend fun replaceSuccessors(successors: List<String>): SimpleResult<Error>
 
     context(ctx: DrpcContext)
-    suspend fun replacePredecessor(newPredecessorAddress: String, newPrePredecessorAddress: String): SimpleResult<Error>
+    suspend fun replacePredecessors(predecessors: List<String>): ResultData<NodeStateDto, Error>
 
 
     context(ctx: DrpcContext)

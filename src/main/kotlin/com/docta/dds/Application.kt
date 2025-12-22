@@ -2,7 +2,7 @@ package com.docta.dds
 
 import com.docta.dds.config.configureDI
 import com.docta.dds.config.configureHTTP
-import com.docta.dds.config.configurePredecessorStateCheck
+import com.docta.dds.config.configureSuccessorStateCheck
 import com.docta.dds.config.configureSerialization
 import com.docta.dds.config.configureStatusPages
 import com.docta.dds.di.mainModule
@@ -30,5 +30,5 @@ fun Application.module() {
         restController = get(),
         service = get()
     )
-    configurePredecessorStateCheck()
+    configureSuccessorStateCheck()
 }

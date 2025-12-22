@@ -25,7 +25,7 @@ class JoinRingUseCaseImpl(
         val service: NodeService = NodeRestControllerImpl(hostname = greeterIpAddress, client = client)
 
         val registrationState = callCatching { service.registerNode() }
-            .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
+            .getOrElse { return SimpleResult.Error(Error.RegisterFailed) }
             .getOrElse { return SimpleResult.Error(it) }
 
         nodeState.registerNode(registrationState = registrationState)

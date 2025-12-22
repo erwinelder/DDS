@@ -8,16 +8,16 @@ import com.docta.drpc.core.network.context.callCatching
 import com.docta.drpc.core.result.SimpleResult
 import io.ktor.client.*
 
-class CheckPredecessorIsAliveUseCaseImpl(
+class CheckSuccessorIsAliveUseCaseImpl(
     private val client: HttpClient,
     private val nodeState: NodeState
-) : CheckPredecessorIsAliveUseCase {
+) : CheckSuccessorIsAliveUseCase {
 
     override suspend fun execute(): SimpleResult<Error> {
-        val predecessorAddress = nodeState.predecessorAddress ?: return SimpleResult.Success()
-        val service: NodeService = NodeRestControllerImpl(hostname = predecessorAddress, client = client)
+        val successorAddress = nodeState.successorAddress ?: return SimpleResult.Success()
+        val service: NodeService = NodeRestControllerImpl(hostname = successorAddress, client = client)
 
-        return callCatching { service.isAlive() }.getOrElse { SimpleResult.Error(Error.ServiceNotAvailable) }
+        return callCatching { service.isAlive() }.getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
     }
 
 }

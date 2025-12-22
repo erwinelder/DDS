@@ -16,30 +16,24 @@ class LeaveRingUseCaseImpl(
 
     override suspend fun execute(): SimpleResult<Error> {
         if (!nodeState.isRegistered()) return SimpleResult.Error(Error.NodeIsNotRegisteredYet)
-        val successorAddress = nodeState.successorAddress ?: return SimpleResult.Error(Error.NodeIsNotRegisteredYet)
-        val predecessorAddress = nodeState.predecessorAddress ?: return SimpleResult.Error(Error.NodeIsNotRegisteredYet)
-        val prePredecessorAddress = nodeState.prePredecessorAddress
+
+        val successorAddress = nodeState.successorAddress ?: return SimpleResult.Success()
+        val predecessorAddress = nodeState.predecessorAddress ?: return SimpleResult.Success()
 
         val successorService: NodeService = NodeRestControllerImpl(hostname = successorAddress, client = client)
-
-        if (successorAddress == predecessorAddress || prePredecessorAddress == null) {
-            return callCatching { successorService.initiateLonelinessProtocol() }
-                .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
-        }
-
-        callCatching {
-            successorService.replacePredecessor(
-                newPredecessorAddress = predecessorAddress,
-                newPrePredecessorAddress = prePredecessorAddress
-            )
-        }
-            .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
-            .onError { return SimpleResult.Error(it) }
-
         val predecessorService: NodeService = NodeRestControllerImpl(hostname = predecessorAddress, client = client)
 
-        callCatching { predecessorService.replaceSuccessor(newIpAddress = successorAddress) }
-            .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
+        if (successorAddress == predecessorAddress) {
+            return callCatching { successorService.initiateLonelinessProtocol() }
+                .getOrElse { return SimpleResult.Error(Error.InitiateLonelinessProtocolFailed) }
+        }
+
+        callCatching { successorService.replacePredecessors(predecessors = nodeState.getPredecessors()) }
+            .getOrElse { return SimpleResult.Error(Error.ReplacePredecessorsFailed) }
+            .onError { return SimpleResult.Error(it) }
+
+        callCatching { predecessorService.replaceSuccessors(successors = nodeState.getSuccessors()) }
+            .getOrElse { return SimpleResult.Error(Error.ReplaceSuccessorsFailed) }
             .onError { return SimpleResult.Error(it) }
 
         callCatching { successorService.proclaimLeader(leaderId = "", leaderAddress = "") }

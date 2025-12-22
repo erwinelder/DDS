@@ -34,12 +34,12 @@ fun Application.configureRouting(
                 service.leave()
             }
 
-            processPostRoute(restController.replaceSuccessorPath) {
-                service.replaceSuccessor(newIpAddress = get(0))
+            processPostRoute(restController.replaceSuccessorsPath) {
+                service.replaceSuccessors(successors = get(0))
             }
 
-            processPostRoute(restController.replacePredecessorPath) {
-                service.replacePredecessor(newPredecessorAddress = get(0), newPrePredecessorAddress = get(1))
+            processPostRoute(restController.replacePredecessorsPath) {
+                service.replacePredecessors(predecessors = get(0))
             }
 
 

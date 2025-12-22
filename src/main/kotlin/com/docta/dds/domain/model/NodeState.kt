@@ -12,21 +12,6 @@ object NodeState {
     val nodeAddress: String
         get() = System.getenv("NODE_ADDRESS")
 
-    var leaderUuid: Uuid? = null
-        private set
-    var leaderAddress: String? = null
-        private set
-    val isLeader: Boolean
-        get() = nodeAddress == leaderAddress
-
-    var successorAddress: String? = null
-        private set
-    var predecessorAddress: String? = null
-        private set
-    var prePredecessorAddress: String? = null
-        private set
-
-
     fun initializeNodeId() {
         if (nodeUuid == null) nodeUuid = Uuid.random()
     }
@@ -36,6 +21,16 @@ object NodeState {
         ?: throw IllegalStateException("Node ID is null for node $nodeAddress")
     fun getNodeIdStringOrNull(): String? = nodeUuid?.toString()
 
+    fun isRegistered(): Boolean = nodeUuid != null
+
+
+    var leaderUuid: Uuid? = null
+        private set
+    var leaderAddress: String? = null
+        private set
+    val isLeader: Boolean
+        get() = nodeAddress == leaderAddress
+
     fun getLeaderId(): Uuid = leaderUuid
         ?: throw IllegalStateException("Leader ID is null for node $nodeAddress")
     fun getLeaderIdString(): String = leaderUuid?.toString()
@@ -44,9 +39,6 @@ object NodeState {
 
     fun getLeaderAddressString(): String = leaderAddress
         ?: throw IllegalStateException("Leader address is null for node $nodeAddress")
-
-    fun isRegistered(): Boolean = nodeUuid != null
-
 
     fun proclaimAsLeader() {
         leaderUuid = nodeUuid
@@ -59,20 +51,57 @@ object NodeState {
     }
 
 
-    fun setSuccessor(address: String?) {
-        successorAddress = address
+    private val successors = mutableListOf<String>()
+    val successorAddress: String?
+        get() = successors.getOrNull(0)
+    val grandSuccessorAddress: String?
+        get() = successors.getOrNull(1)
+
+    private val predecessors = mutableListOf<String>()
+    val predecessorAddress: String?
+        get() = predecessors.getOrNull(0)
+
+    fun getSuccessors(): List<String> = successors.toList()
+    fun getPredecessors(): List<String> = predecessors.toList()
+
+    fun setSuccessors(addresses: List<String>) {
+        successors.clear()
+        successors.addAll(addresses)
     }
-    fun setPredecessor(address: String?) {
-        predecessorAddress = address
-    }
-    fun setPrePredecessor(address: String?) {
-        prePredecessorAddress = address
+    fun setPredecessors(addresses: List<String>) {
+        predecessors.clear()
+        predecessors.addAll(addresses)
     }
 
-    fun resetAllNeighbors() {
-        successorAddress = null
-        predecessorAddress = null
-        prePredecessorAddress = null
+    fun removeGrandSuccessor() {
+        if (successors.size >= 2) {
+            successors.removeAt(1)
+        }
+    }
+    fun removeAllNeighbors() {
+        successors.clear()
+        predecessors.clear()
+    }
+
+    fun successorsEqual(other: List<String>): Boolean {
+        val nodeAddress = nodeAddress
+        val other = other.filter { it != nodeAddress }
+
+        if (successors.size != other.size) return false
+        for (i in successors.indices) {
+            if (successors[i] != other[i]) return false
+        }
+        return true
+    }
+    fun predecessorsEqual(other: List<String>): Boolean {
+        val nodeAddress = nodeAddress
+        val other = other.filter { it != nodeAddress }
+
+        if (predecessors.size != other.size) return false
+        for (i in predecessors.indices) {
+            if (predecessors[i] != other[i]) return false
+        }
+        return true
     }
 
 
@@ -83,11 +112,9 @@ object NodeState {
 
     fun registerNode(registrationState: RegistrationStateDto) {
         initializeNodeId()
-        leaderUuid = Uuid.parse(uuidString = registrationState.leaderId)
-        leaderAddress = registrationState.leaderAddress
-        successorAddress = registrationState.successorAddress
-        predecessorAddress = registrationState.predecessorAddress
-        prePredecessorAddress = registrationState.prePredecessorAddress
+        updateLeader(leaderId = registrationState.leaderId, leaderAddress = registrationState.leaderAddress)
+        setSuccessors(addresses = registrationState.successors)
+        setPredecessors(addresses = registrationState.predecessors)
     }
 
 }

@@ -23,7 +23,7 @@ class ProclaimLeaderUseCaseImpl(
 
         val service: NodeService = NodeRestControllerImpl(hostname = successorAddress, client = client)
         return callCatching { service.proclaimLeader(leaderId = leaderId, leaderAddress = leaderAddress) }
-            .getOrElse { return SimpleResult.Error(Error.ServiceNotAvailable) }
+            .getOrElse { return SimpleResult.Error(Error.ProclaimLeaderFailed) }
     }
 
 }

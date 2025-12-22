@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 data class RegistrationStateDto(
     val leaderId: String,
     val leaderAddress: String,
-    val successorAddress: String,
-    val predecessorAddress: String,
-    val prePredecessorAddress: String?
+    val successors: List<String>,
+    val predecessors: List<String>
 )

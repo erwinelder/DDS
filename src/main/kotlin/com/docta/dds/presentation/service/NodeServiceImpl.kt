@@ -24,7 +24,9 @@ class NodeServiceImpl(
     private val registerNodeUseCase: RegisterNodeUseCase,
     private val leaveRingUseCase: LeaveRingUseCase,
     private val proclaimLeaderUseCase: ProclaimLeaderUseCase,
-    private val initiateLonelinessProtocolUseCase: InitiateLonelinessProtocolUseCase
+    private val initiateLonelinessProtocolUseCase: InitiateLonelinessProtocolUseCase,
+    private val replaceSuccessorsUseCase: ReplaceSuccessorsUseCase,
+    private val replacePredecessorsUseCase: ReplacePredecessorsUseCase
 ) : NodeService {
 
     context(ctx: DrpcContext)
@@ -36,8 +38,8 @@ class NodeServiceImpl(
             leaderAddress = nodeState.leaderAddress,
             isLeader = nodeState.isLeader,
             successorAddress = nodeState.successorAddress,
-            predecessorAddress = nodeState.predecessorAddress,
-            predecessorOfPredecessorAddress = nodeState.prePredecessorAddress
+            grandSuccessorAddress = nodeState.grandSuccessorAddress,
+            predecessorAddress = nodeState.predecessorAddress
         )
         return ResultData.Success(data = nodeState)
     }
@@ -84,25 +86,20 @@ class NodeServiceImpl(
     }
 
     context(ctx: DrpcContext)
-    override suspend fun replaceSuccessor(newIpAddress: String): ResultData<String?, Error> {
-        if (nodeState.prePredecessorAddress == nodeState.successorAddress) {
-            nodeState.setPrePredecessor(address = null)
-        }
-        nodeState.setSuccessor(address = newIpAddress.takeIf { it != nodeState.nodeAddress })
+    override suspend fun replaceSuccessors(successors: List<String>): SimpleResult<Error> {
+        if (!nodeState.isRegistered()) return SimpleResult.Success()
+        if (nodeState.successorsEqual(other = successors)) return SimpleResult.Success()
 
-        return ResultData.Success(data = nodeState.predecessorAddress)
+        return replaceSuccessorsUseCase.execute(successors = successors)
     }
 
     context(ctx: DrpcContext)
-    override suspend fun replacePredecessor(
-        newPredecessorAddress: String,
-        newPrePredecessorAddress: String
-    ): SimpleResult<Error> {
+    override suspend fun replacePredecessors(predecessors: List<String>): ResultData<NodeStateDto, Error> {
+        if (nodeState.predecessorsEqual(other = predecessors)) return getState()
 
-        nodeState.setPredecessor(address = newPredecessorAddress.takeIf { it != nodeState.nodeAddress })
-        nodeState.setPrePredecessor(address = newPrePredecessorAddress.takeIf { it != nodeState.nodeAddress })
+        replacePredecessorsUseCase.execute(predecessors = predecessors).onError { return ResultData.Error(it) }
 
-        return SimpleResult.Success()
+        return getState()
     }
 
 

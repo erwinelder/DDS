@@ -7,7 +7,7 @@ class InitiateLonelinessProtocolUseCaseImpl(
 ) : InitiateLonelinessProtocolUseCase {
 
     override fun execute() {
-        nodeState.resetAllNeighbors()
+        nodeState.removeAllNeighbors()
         nodeState.proclaimAsLeader()
     }
 

@@ -10,6 +10,6 @@ data class NodeStateDto(
     val leaderAddress: String?,
     val isLeader: Boolean,
     val successorAddress: String?,
-    val predecessorAddress: String?,
-    val predecessorOfPredecessorAddress: String?
+    val grandSuccessorAddress: String?,
+    val predecessorAddress: String?
 )

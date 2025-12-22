@@ -29,11 +29,11 @@ interface NodeRestController : NodeService {
     val leavePath: String
         get() = "/leave"
 
-    val replaceSuccessorPath: String
-        get() = "/replaceSuccessor"
+    val replaceSuccessorsPath: String
+        get() = "/replaceSuccessors"
 
-    val replacePredecessorPath: String
-        get() = "/replacePredecessor"
+    val replacePredecessorsPath: String
+        get() = "/replacePredecessors"
 
 
     val proclaimLeaderPath: String
