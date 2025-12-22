@@ -5,6 +5,7 @@ import com.docta.dds.config.configureHTTP
 import com.docta.dds.config.configureSerialization
 import com.docta.dds.config.configureStatusPages
 import com.docta.dds.di.mainModule
+import com.docta.dds.domain.model.AppContext
 import com.docta.dds.error.Error
 import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.dds.presentation.model.NodeStateDto
@@ -239,8 +240,10 @@ class NodeIntegrationTest {
             assertNull(actual = getErrorOrNull())
         }
 
-        ProcessBuilder("scripts/stop_remote_docker_container.sh", nodeIp2).start().waitFor()
-        delay(6000)
+        callCatching { service2.kill() }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        delay(AppContext.successorStateCheckInterval + 1000)
 
         callCatching { service1.getState() }.getOrThrow().apply {
             val data = getDataOrNull()

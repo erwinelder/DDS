@@ -34,6 +34,10 @@ fun Application.configureRouting(
                 service.leave()
             }
 
+            processPostRoute(restController.killPath) {
+                service.kill()
+            }
+
             processPostRoute(restController.replaceSuccessorsPath) {
                 service.replaceSuccessors(successors = get(0))
             }

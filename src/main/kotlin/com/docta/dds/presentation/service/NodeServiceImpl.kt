@@ -86,6 +86,16 @@ class NodeServiceImpl(
     }
 
     context(ctx: DrpcContext)
+    override suspend fun kill(): SimpleResult<Error> {
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(1000)
+            exitProcess(0)
+        }
+
+        return SimpleResult.Success()
+    }
+
+    context(ctx: DrpcContext)
     override suspend fun replaceSuccessors(successors: List<String>): SimpleResult<Error> {
         if (!nodeState.isRegistered()) return SimpleResult.Success()
         if (nodeState.successorsEqual(other = successors)) return SimpleResult.Success()

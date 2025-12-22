@@ -29,6 +29,9 @@ interface NodeRestController : NodeService {
     val leavePath: String
         get() = "/leave"
 
+    val killPath: String
+        get() = "/kill"
+
     val replaceSuccessorsPath: String
         get() = "/replaceSuccessors"
 

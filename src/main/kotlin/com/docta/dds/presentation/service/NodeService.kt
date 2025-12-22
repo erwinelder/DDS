@@ -26,6 +26,9 @@ interface NodeService {
     suspend fun leave(): SimpleResult<Error>
 
     context(ctx: DrpcContext)
+    suspend fun kill(): SimpleResult<Error>
+
+    context(ctx: DrpcContext)
     suspend fun replaceSuccessors(successors: List<String>): SimpleResult<Error>
 
     context(ctx: DrpcContext)

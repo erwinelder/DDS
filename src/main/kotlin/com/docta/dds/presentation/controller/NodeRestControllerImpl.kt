@@ -45,6 +45,11 @@ class NodeRestControllerImpl(
     )
 
     context(ctx: DrpcContext)
+    override suspend fun kill(): SimpleResult<Error> = client.callPost(
+        url = absoluteUrl + killPath
+    )
+
+    context(ctx: DrpcContext)
     override suspend fun replaceSuccessors(
         successors: List<String>
     ): SimpleResult<Error> = client.callPost(
