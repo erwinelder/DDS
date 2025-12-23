@@ -1,7 +1,7 @@
 package com.docta.dds.presentation.controller
 
 import com.docta.dds.domain.model.chat.ChatState
-import com.docta.dds.error.NodeError
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.domain.model.node.NodeState
 import com.docta.dds.domain.model.node.RegistrationState
 import com.docta.drpc.core.network.context.DrpcContext

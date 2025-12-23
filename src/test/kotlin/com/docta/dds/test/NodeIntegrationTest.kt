@@ -8,7 +8,7 @@ import com.docta.dds.di.chatModule
 import com.docta.dds.di.mainModule
 import com.docta.dds.di.nodeModule
 import com.docta.dds.domain.model.core.AppContext
-import com.docta.dds.error.NodeError
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.dds.domain.model.node.NodeState
 import com.docta.drpc.core.network.context.callCatching

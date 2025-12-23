@@ -3,7 +3,7 @@ package com.docta.dds.domain.usecase.node
 import com.docta.dds.domain.model.chat.ChatContext
 import com.docta.dds.domain.model.chat.ChatState
 import com.docta.dds.domain.model.node.NodeContext
-import com.docta.dds.error.NodeError
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
 import com.docta.drpc.core.network.context.callCatching

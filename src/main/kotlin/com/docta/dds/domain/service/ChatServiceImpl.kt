@@ -8,7 +8,7 @@ import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.usecase.chat.BroadcastMessageRequestUseCase
 import com.docta.dds.domain.usecase.chat.BroadcastMessageUseCase
 import com.docta.dds.domain.usecase.chat.SendMessageUseCase
-import com.docta.dds.error.ChatError
+import com.docta.dds.domain.error.ChatError
 import com.docta.dds.presentation.service.ChatService
 import com.docta.drpc.core.network.context.DrpcContext
 import com.docta.drpc.core.result.ResultData

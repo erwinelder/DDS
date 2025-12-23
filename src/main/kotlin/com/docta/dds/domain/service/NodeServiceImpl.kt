@@ -2,7 +2,7 @@ package com.docta.dds.domain.service
 
 import com.docta.dds.domain.model.chat.ChatState
 import com.docta.dds.domain.model.node.NodeContext
-import com.docta.dds.error.NodeError
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.domain.model.node.NodeState
 import com.docta.dds.domain.model.node.RegistrationState
 import com.docta.dds.domain.usecase.node.InitiateLonelinessProtocolUseCase

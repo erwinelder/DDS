@@ -1,4 +1,4 @@
-package com.docta.dds.error
+package com.docta.dds.domain.error
 
 import kotlinx.serialization.Serializable
 
