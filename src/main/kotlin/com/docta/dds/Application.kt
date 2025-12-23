@@ -1,16 +1,13 @@
 package com.docta.dds
 
-import com.docta.dds.config.configureDI
-import com.docta.dds.config.configureHTTP
-import com.docta.dds.config.configureSuccessorStateCheck
-import com.docta.dds.config.configureSerialization
-import com.docta.dds.config.configureStatusPages
+import com.docta.dds.config.*
+import com.docta.dds.di.chatModule
 import com.docta.dds.di.mainModule
+import com.docta.dds.di.nodeModule
 import com.docta.dds.presentation.route.configureRouting
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import org.koin.ktor.ext.get
 
 fun main() {
     embeddedServer(
@@ -25,10 +22,7 @@ fun Application.module() {
     configureSerialization()
     configureHTTP()
     configureStatusPages()
-    configureDI(mainModule)
-    configureRouting(
-        restController = get(),
-        service = get()
-    )
+    configureDI(mainModule, nodeModule, chatModule)
+    configureRouting()
     configureSuccessorStateCheck()
 }

@@ -1,8 +1,9 @@
 package com.docta.dds.presentation.controller
 
-import com.docta.dds.error.Error
-import com.docta.dds.presentation.model.NodeStateDto
-import com.docta.dds.presentation.model.RegistrationStateDto
+import com.docta.dds.domain.model.chat.ChatState
+import com.docta.dds.error.NodeError
+import com.docta.dds.domain.model.node.NodeState
+import com.docta.dds.domain.model.node.RegistrationState
 import com.docta.drpc.core.network.context.DrpcContext
 import com.docta.drpc.core.network.asCallParameter
 import com.docta.drpc.core.network.client.callPost
@@ -16,12 +17,12 @@ class NodeRestControllerImpl(
 ) : NodeRestController {
 
     context(ctx: DrpcContext)
-    override suspend fun getState(): ResultData<NodeStateDto, Error> = client.callPost(
+    override suspend fun getState(): ResultData<NodeState, NodeError> = client.callPost(
         url = absoluteUrl + getStatePath
     )
 
     context(ctx: DrpcContext)
-    override suspend fun isAlive(): SimpleResult<Error> = client.callPost(
+    override suspend fun isAlive(): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + isAlivePath
     )
 
@@ -29,30 +30,30 @@ class NodeRestControllerImpl(
     context(ctx: DrpcContext)
     override suspend fun join(
         greeterIpAddress: String
-    ): SimpleResult<Error> = client.callPost(
+    ): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + joinPath,
         greeterIpAddress.asCallParameter()
     )
 
     context(ctx: DrpcContext)
-    override suspend fun registerNode(): ResultData<RegistrationStateDto, Error> = client.callPost(
+    override suspend fun registerNode(): ResultData<RegistrationState, NodeError> = client.callPost(
         url = absoluteUrl + registerNodePath
     )
 
     context(ctx: DrpcContext)
-    override suspend fun leave(): SimpleResult<Error> = client.callPost(
+    override suspend fun leave(): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + leavePath
     )
 
     context(ctx: DrpcContext)
-    override suspend fun kill(): SimpleResult<Error> = client.callPost(
+    override suspend fun kill(): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + killPath
     )
 
     context(ctx: DrpcContext)
     override suspend fun replaceSuccessors(
         successors: List<String>
-    ): SimpleResult<Error> = client.callPost(
+    ): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + replaceSuccessorsPath,
         successors.asCallParameter()
     )
@@ -60,7 +61,7 @@ class NodeRestControllerImpl(
     context(ctx: DrpcContext)
     override suspend fun replacePredecessors(
         predecessors: List<String>
-    ): ResultData<NodeStateDto, Error> = client.callPost(
+    ): ResultData<NodeState, NodeError> = client.callPost(
         url = absoluteUrl + replacePredecessorsPath,
         predecessors.asCallParameter()
     )
@@ -69,15 +70,17 @@ class NodeRestControllerImpl(
     context(ctx: DrpcContext)
     override suspend fun proclaimLeader(
         leaderId: String,
-        leaderAddress: String
-    ): SimpleResult<Error> = client.callPost(
+        leaderAddress: String,
+        chatState: ChatState
+    ): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + proclaimLeaderPath,
         leaderId.asCallParameter(),
-        leaderAddress.asCallParameter()
+        leaderAddress.asCallParameter(),
+        chatState.asCallParameter()
     )
 
     context(ctx: DrpcContext)
-    override suspend fun initiateLonelinessProtocol(): SimpleResult<Error> = client.callPost(
+    override suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + initiateLonelinessProtocolPath
     )
 

@@ -4,11 +4,13 @@ import com.docta.dds.config.configureDI
 import com.docta.dds.config.configureHTTP
 import com.docta.dds.config.configureSerialization
 import com.docta.dds.config.configureStatusPages
+import com.docta.dds.di.chatModule
 import com.docta.dds.di.mainModule
-import com.docta.dds.domain.model.AppContext
-import com.docta.dds.error.Error
+import com.docta.dds.di.nodeModule
+import com.docta.dds.domain.model.core.AppContext
+import com.docta.dds.error.NodeError
 import com.docta.dds.presentation.controller.NodeRestController
-import com.docta.dds.presentation.model.NodeStateDto
+import com.docta.dds.domain.model.node.NodeState
 import com.docta.drpc.core.network.context.callCatching
 import io.ktor.server.testing.*
 import kotlinx.coroutines.delay
@@ -23,7 +25,7 @@ class NodeIntegrationTest {
             configureSerialization()
             configureHTTP()
             configureStatusPages()
-            configureDI(mainModule)
+            configureDI(mainModule, nodeModule, chatModule)
         }
     }
 
@@ -71,13 +73,13 @@ class NodeIntegrationTest {
         val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
 
         callCatching { service1.join(greeterIpAddress = nodeIp2) }.getOrThrow().apply {
-            assertEquals(actual = getErrorOrNull(), expected = Error.NodeIsNotRegisteredYet)
+            assertEquals(actual = getErrorOrNull(), expected = NodeError.NodeIsNotRegisteredYet)
         }
         callCatching { service2.join(greeterIpAddress = nodeIp3) }.getOrThrow().apply {
-            assertEquals(actual = getErrorOrNull(), expected = Error.NodeIsNotRegisteredYet)
+            assertEquals(actual = getErrorOrNull(), expected = NodeError.NodeIsNotRegisteredYet)
         }
         callCatching { service3.join(greeterIpAddress = nodeIp1) }.getOrThrow().apply {
-            assertEquals(actual = getErrorOrNull(), expected = Error.NodeIsNotRegisteredYet)
+            assertEquals(actual = getErrorOrNull(), expected = NodeError.NodeIsNotRegisteredYet)
         }
 
         callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
@@ -85,7 +87,7 @@ class NodeIntegrationTest {
         }
         callCatching { service1.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
@@ -102,7 +104,7 @@ class NodeIntegrationTest {
         }
         callCatching { service1.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
@@ -112,7 +114,7 @@ class NodeIntegrationTest {
         }
         callCatching { service2.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp2)
@@ -126,7 +128,7 @@ class NodeIntegrationTest {
         }
         callCatching { service1.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp1)
@@ -136,7 +138,7 @@ class NodeIntegrationTest {
         }
         callCatching { service2.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp2)
@@ -146,7 +148,7 @@ class NodeIntegrationTest {
         }
         callCatching { service3.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
 
             assertNotNull(actual = data.nodeId)
             assertEquals(actual = data.nodeAddress, expected = nodeIp3)
@@ -166,9 +168,9 @@ class NodeIntegrationTest {
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
         val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
-        var node1State: NodeStateDto
-        var node2State: NodeStateDto
-        var node3State: NodeStateDto
+        var node1State: NodeState
+        var node2State: NodeState
+        var node3State: NodeState
 
         callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
             assertNull(actual = getErrorOrNull())
@@ -182,17 +184,17 @@ class NodeIntegrationTest {
 
         callCatching { service1.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
             node1State = data
         }
         callCatching { service2.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
             node2State = data
         }
         callCatching { service3.getState() }.getOrThrow().apply {
             val data = getDataOrNull()
-            assertNotNull(data)
+            assertNotNull(actual = data)
             node3State = data
         }
 
@@ -227,8 +229,8 @@ class NodeIntegrationTest {
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
         val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
-        var node1State: NodeStateDto
-        var node3State: NodeStateDto
+        var node1State: NodeState
+        var node3State: NodeState
 
         callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
             assertNull(actual = getErrorOrNull())
@@ -287,8 +289,8 @@ class NodeIntegrationTest {
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
         val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
-        var node1State: NodeStateDto
-        var node3State: NodeStateDto
+        var node1State: NodeState
+        var node3State: NodeState
 
         callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
             assertNull(actual = getErrorOrNull())
