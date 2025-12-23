@@ -3,6 +3,7 @@ package com.docta.dds.domain.service
 import com.docta.dds.domain.model.chat.ChatState
 import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.error.NodeError
+import com.docta.dds.domain.model.core.AppContext
 import com.docta.dds.domain.model.node.NodeState
 import com.docta.dds.domain.model.node.RegistrationState
 import com.docta.dds.domain.usecase.node.InitiateLonelinessProtocolUseCase
@@ -50,6 +51,12 @@ class NodeServiceImpl(
             predecessorAddress = nodeContext.predecessorAddress
         )
         return ResultData.Success(data = nodeState)
+    }
+
+    context(ctx: DrpcContext)
+    override suspend fun setMessageDelay(delayMs: Long): SimpleResult<NodeError> {
+        AppContext.setMessageDelay(delayMs = delayMs)
+        return SimpleResult.Success()
     }
 
     context(ctx: DrpcContext)

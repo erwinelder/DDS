@@ -8,5 +8,6 @@ services:
     build: .
     ports:
       - "8080:8080"
-#    environment:
+    environment:
+      NODE_ADDRESS: ""
     restart: unless-stopped

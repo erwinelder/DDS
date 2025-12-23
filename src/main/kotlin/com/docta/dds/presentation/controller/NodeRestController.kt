@@ -16,6 +16,9 @@ interface NodeRestController : NodeService {
     val getStatePath: String
         get() = "/getState"
 
+    val setMessageDelayPath: String
+        get() = "/setMessageDelay"
+
     val isAlivePath: String
         get() = "/isAlive"
 

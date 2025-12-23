@@ -1,11 +1,11 @@
 package com.docta.dds.domain.usecase.node
 
+import com.docta.dds.data.utils.callSuspend
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.domain.model.chat.ChatContext
 import com.docta.dds.domain.model.node.NodeContext
-import com.docta.dds.domain.error.NodeError
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
-import com.docta.drpc.core.network.context.callCatching
 import com.docta.drpc.core.result.SimpleResult
 import com.docta.drpc.core.result.getOrElse
 import io.ktor.client.*
@@ -26,7 +26,7 @@ class JoinRingUseCaseImpl(
 
         val service: NodeService = NodeRestControllerImpl(hostname = greeterIpAddress, client = client)
 
-        val registrationState = callCatching { service.registerNode() }
+        val registrationState = callSuspend { service.registerNode() }
             .getOrElse { return SimpleResult.Error(NodeError.RegisterFailed) }
             .getOrElse { return SimpleResult.Error(it) }
 

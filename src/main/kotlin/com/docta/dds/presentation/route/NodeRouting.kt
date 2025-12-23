@@ -16,6 +16,10 @@ fun Routing.configureNodeRouting(
             service.getState()
         }
 
+        processPostRoute(restController.setMessageDelayPath) {
+            service.setMessageDelay(delayMs = get(0))
+        }
+
         processPostRoute(restController.isAlivePath) {
             service.isAlive()
         }

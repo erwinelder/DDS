@@ -2,11 +2,15 @@ package com.docta.dds.domain.model.core
 
 object AppContext {
 
-    var successorStateCheckInterval: Long = 5000
+    var messageDelay: Long = 0
         private set
 
-    fun setSuccessorStateCheckInterval(intervalMs: Long) {
-        successorStateCheckInterval = intervalMs
+    fun setMessageDelay(delayMs: Long) {
+        messageDelay = delayMs
     }
+
+
+    var successorStateCheckInterval: Long = 5000
+        private set
 
 }

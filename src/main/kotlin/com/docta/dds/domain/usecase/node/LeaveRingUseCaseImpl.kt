@@ -1,11 +1,11 @@
 package com.docta.dds.domain.usecase.node
 
+import com.docta.dds.data.utils.callSuspend
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.domain.model.chat.ChatContext
 import com.docta.dds.domain.model.node.NodeContext
-import com.docta.dds.domain.error.NodeError
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
-import com.docta.drpc.core.network.context.callCatching
 import com.docta.drpc.core.result.SimpleResult
 import com.docta.drpc.core.result.onError
 import io.ktor.client.*
@@ -26,19 +26,19 @@ class LeaveRingUseCaseImpl(
         val predecessorService: NodeService = NodeRestControllerImpl(hostname = predecessorAddress, client = client)
 
         if (successorAddress == predecessorAddress) {
-            return callCatching { successorService.initiateLonelinessProtocol() }
+            return callSuspend { successorService.initiateLonelinessProtocol() }
                 .getOrElse { return SimpleResult.Error(NodeError.InitiateLonelinessProtocolFailed) }
         }
 
-        callCatching { successorService.replacePredecessors(predecessors = nodeContext.getPredecessors()) }
+        callSuspend { successorService.replacePredecessors(predecessors = nodeContext.getPredecessors()) }
             .getOrElse { return SimpleResult.Error(NodeError.ReplacePredecessorsFailed) }
             .onError { return SimpleResult.Error(it) }
 
-        callCatching { predecessorService.replaceSuccessors(successors = nodeContext.getSuccessors()) }
+        callSuspend { predecessorService.replaceSuccessors(successors = nodeContext.getSuccessors()) }
             .getOrElse { return SimpleResult.Error(NodeError.ReplaceSuccessorsFailed) }
             .onError { return SimpleResult.Error(it) }
 
-        callCatching {
+        callSuspend {
             successorService.proclaimLeader(leaderId = "", leaderAddress = "", chatState = chatContext.getChatState())
         }.getOrElse { return SimpleResult.Error(NodeError.ProclaimLeaderFailed) }
 

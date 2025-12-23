@@ -14,6 +14,9 @@ interface NodeService {
     suspend fun getState(): ResultData<NodeState, NodeError>
 
     context(ctx: DrpcContext)
+    suspend fun setMessageDelay(delayMs: Long): SimpleResult<NodeError>
+
+    context(ctx: DrpcContext)
     suspend fun isAlive(): SimpleResult<NodeError>
 
 

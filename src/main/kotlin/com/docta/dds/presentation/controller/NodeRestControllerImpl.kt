@@ -22,6 +22,14 @@ class NodeRestControllerImpl(
     )
 
     context(ctx: DrpcContext)
+    override suspend fun setMessageDelay(
+        delayMs: Long
+    ): SimpleResult<NodeError> = client.callPost(
+        url = absoluteUrl + setMessageDelayPath,
+        delayMs.asCallParameter()
+    )
+
+    context(ctx: DrpcContext)
     override suspend fun isAlive(): SimpleResult<NodeError> = client.callPost(
         url = absoluteUrl + isAlivePath
     )

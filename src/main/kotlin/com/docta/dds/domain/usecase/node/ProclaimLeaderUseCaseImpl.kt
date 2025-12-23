@@ -1,14 +1,14 @@
 package com.docta.dds.domain.usecase.node
 
+import com.docta.dds.data.utils.callSuspend
+import com.docta.dds.domain.error.NodeError
 import com.docta.dds.domain.model.chat.ChatContext
 import com.docta.dds.domain.model.chat.ChatState
 import com.docta.dds.domain.model.node.NodeContext
-import com.docta.dds.domain.error.NodeError
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
-import com.docta.drpc.core.network.context.callCatching
 import com.docta.drpc.core.result.SimpleResult
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 
 class ProclaimLeaderUseCaseImpl(
     private val client: HttpClient,
@@ -33,7 +33,7 @@ class ProclaimLeaderUseCaseImpl(
         val successorAddress = nodeContext.successorAddress ?: return SimpleResult.Error(NodeError.RingConsistsOnlyOfOneNode)
         val service: NodeService = NodeRestControllerImpl(hostname = successorAddress, client = client)
 
-        return callCatching {
+        return callSuspend {
             service.proclaimLeader(leaderId = leaderId, leaderAddress = leaderAddress, chatState = chatState)
         }.getOrElse { return SimpleResult.Error(NodeError.ProclaimLeaderFailed) }
     }
