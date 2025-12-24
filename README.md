@@ -7,17 +7,10 @@ Creation and setup of a simplified version of this project was described in the 
 
 # Building & Running
 
-To build or run the project, use one of the following tasks:
+The project can be run on multiple virtual machines to simulate a distributed system.
+To build and run the project, update `build_and_distribute.sh` script to adjust IP addresses of your VMs and run the script. It requires Docker to be installed and running on virtual machines in order to simplify environment setup and deployment. You can refer to the [Medium post, section "Install Docker on the VM"](https://medium.com/@erwinelder/how-to-build-a-basic-distributed-system-9b62c0e87ff1) for a quick introduction to how to set up Docker on a VM.
 
-| Task                                    | Description                                                          |
-| -----------------------------------------|---------------------------------------------------------------------- |
-| `./gradlew test`                        | Run the tests                                                        |
-| `./gradlew build`                       | Build everything                                                     |
-| `./gradlew buildFatJar`                 | Build an executable JAR of the server with all dependencies included |
-| `./gradlew buildImage`                  | Build the docker image to use with the fat JAR                       |
-| `./gradlew publishImageToLocalRegistry` | Publish the docker image locally                                     |
-| `./gradlew run`                         | Run the server                                                       |
-| `./gradlew runDocker`                   | Run using the local docker image                                     |
+Alternatively, you can build the project locally using `./gradlew clean build` command and then copy the generated fat JAR file from `build/libs/DDS-all.jar` to each virtual machine. Please take into account that the application requires `NODE_ADDRESS` environment variable to be set to the IP address of the machine before starting the application.
 
 If the server starts successfully, you'll see the following output:
 
