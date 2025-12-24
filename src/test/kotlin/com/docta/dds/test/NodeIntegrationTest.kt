@@ -20,6 +20,13 @@ import kotlin.test.*
 
 class NodeIntegrationTest {
 
+    private suspend fun ApplicationTestBuilder.configureAndRunApplication() {
+        configureApplication()
+        startApplication()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
+        delay(500)
+    }
+
     private fun ApplicationTestBuilder.configureApplication() {
         application {
             configureSerialization()
@@ -32,14 +39,13 @@ class NodeIntegrationTest {
     val nodeIp1 = "192.168.64.3"
     val nodeIp2 = "192.168.64.4"
     val nodeIp3 = "192.168.64.5"
+    val nodeIp4 = "192.168.64.6"
+    val nodeIp5 = "192.168.64.7"
 
 
     @Test
     fun `nodeState returns empty state for unregistered nodes`() = testApplication {
-        configureApplication()
-        startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
-        delay(500)
+        configureAndRunApplication()
 
         listOf(
             nodeIp1, nodeIp2, nodeIp3
@@ -62,11 +68,8 @@ class NodeIntegrationTest {
     }
 
     @Test
-    fun `nodes registration is successful`() = testApplication {
-        configureApplication()
-        startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
-        delay(500)
+    fun `nodes registration in a small ring is successful`() = testApplication {
+        configureAndRunApplication()
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
@@ -159,11 +162,192 @@ class NodeIntegrationTest {
     }
 
     @Test
+    fun `nodes registration in a big ring is successful`() = testApplication {
+        configureAndRunApplication()
+
+        val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
+        val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
+        val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
+        val service4 = application.get<NodeRestController> { parametersOf(nodeIp4) }
+        val service5 = application.get<NodeRestController> { parametersOf(nodeIp5) }
+
+        callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp1)
+            assertEquals(actual = data.leaderId, expected = data.nodeId)
+            assertEquals(actual = data.leaderAddress, expected = nodeIp1)
+            assertTrue(actual = data.isLeader)
+            assertNull(actual = data.successorAddress)
+            assertNull(actual = data.grandSuccessorAddress)
+            assertNull(actual = data.predecessorAddress)
+        }
+
+        callCatching { service2.join(greeterIpAddress = nodeIp1) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp1)
+            assertEquals(actual = data.successorAddress, expected = nodeIp2)
+            assertNull(actual = data.grandSuccessorAddress)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp2)
+        }
+        callCatching { service2.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp2)
+            assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertNull(actual = data.grandSuccessorAddress)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
+        }
+
+        callCatching { service3.join(greeterIpAddress = nodeIp2) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp1)
+            assertEquals(actual = data.successorAddress, expected = nodeIp2)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp3)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
+        }
+        callCatching { service2.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp2)
+            assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp1)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
+        }
+        callCatching { service3.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp3)
+            assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp2)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp2)
+        }
+
+        callCatching { service4.join(greeterIpAddress = nodeIp3) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp1)
+            assertEquals(actual = data.successorAddress, expected = nodeIp2)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp3)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp4)
+        }
+        callCatching { service2.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp2)
+            assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp4)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
+        }
+        callCatching { service3.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp3)
+            assertEquals(actual = data.successorAddress, expected = nodeIp4)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp1)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp2)
+        }
+        callCatching { service4.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp4)
+            assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp2)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
+        }
+
+        callCatching { service5.join(greeterIpAddress = nodeIp4) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp1)
+            assertEquals(actual = data.successorAddress, expected = nodeIp2)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp3)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp5)
+        }
+        callCatching { service2.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp2)
+            assertEquals(actual = data.successorAddress, expected = nodeIp3)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp4)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp1)
+        }
+        callCatching { service3.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp3)
+            assertEquals(actual = data.successorAddress, expected = nodeIp4)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp5)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp2)
+        }
+        callCatching { service4.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp4)
+            assertEquals(actual = data.successorAddress, expected = nodeIp5)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp1)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp3)
+        }
+        callCatching { service5.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+
+            assertNotNull(actual = data.nodeId)
+            assertEquals(actual = data.nodeAddress, expected = nodeIp5)
+            assertEquals(actual = data.successorAddress, expected = nodeIp1)
+            assertEquals(actual = data.grandSuccessorAddress, expected = nodeIp2)
+            assertEquals(actual = data.predecessorAddress, expected = nodeIp4)
+        }
+    }
+
+    @Test
     fun `new leader with max id is elected after nodes join`() = testApplication {
-        configureApplication()
-        startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
-        delay(500)
+        configureAndRunApplication()
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
@@ -221,10 +405,7 @@ class NodeIntegrationTest {
 
     @Test
     fun `ring recovers successfully after node death`() = testApplication {
-        configureApplication()
-        startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
-        delay(500)
+        configureAndRunApplication()
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
@@ -281,10 +462,7 @@ class NodeIntegrationTest {
 
     @Test
     fun `ring reconstructs successfully after node leave`() = testApplication {
-        configureApplication()
-        startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
-        delay(500)
+        configureAndRunApplication()
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }

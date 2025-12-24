@@ -22,6 +22,13 @@ import kotlin.test.assertNull
 
 class ChatIntegrationTest {
 
+    private suspend fun ApplicationTestBuilder.configureAndRunApplication() {
+        configureApplication()
+        startApplication()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
+        delay(500)
+    }
+
     private fun ApplicationTestBuilder.configureApplication() {
         application {
             configureSerialization()
@@ -38,10 +45,7 @@ class ChatIntegrationTest {
 
     @Test
     fun `sent message successfully broadcasts to each node`() = testApplication {
-        configureApplication()
-        startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
-        delay(500)
+        configureAndRunApplication()
 
         val nodeService1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
         val nodeService2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
