@@ -3,6 +3,8 @@
 DDS is a sample project demonstrating a simple distributed system architecture using Kotlin and Ktor.
 The app uses Peterson algorithm, circle (ring) topology, and [dRPC](https://github.com/erwinelder/dRPC) for communication between nodes. It also implements leader election logic and a simple chat functionality.
 
+Creation and setup of a simplified version of this project was described in the following [post on Medium](https://medium.com/@erwinelder/how-to-build-a-basic-distributed-system-9b62c0e87ff1).
+
 # Building & Running
 
 To build or run the project, use one of the following tasks:
