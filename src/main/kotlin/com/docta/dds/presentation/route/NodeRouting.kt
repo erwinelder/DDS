@@ -50,6 +50,10 @@ fun Routing.configureNodeRouting(
         }
 
 
+        processPostRoute(restController.startElectionPath) {
+            service.startElection()
+        }
+
         processPostRoute(restController.proclaimLeaderPath) {
             service.proclaimLeader(leaderId = get(0), leaderAddress = get(1), chatState = get(2))
         }

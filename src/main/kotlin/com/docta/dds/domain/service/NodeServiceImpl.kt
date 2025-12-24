@@ -1,18 +1,12 @@
 package com.docta.dds.domain.service
 
-import com.docta.dds.domain.model.chat.ChatState
-import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.error.NodeError
+import com.docta.dds.domain.model.chat.ChatState
 import com.docta.dds.domain.model.core.AppContext
+import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.model.node.NodeState
 import com.docta.dds.domain.model.node.RegistrationState
-import com.docta.dds.domain.usecase.node.InitiateLonelinessProtocolUseCase
-import com.docta.dds.domain.usecase.node.JoinRingUseCase
-import com.docta.dds.domain.usecase.node.LeaveRingUseCase
-import com.docta.dds.domain.usecase.node.ProclaimLeaderUseCase
-import com.docta.dds.domain.usecase.node.RegisterNodeUseCase
-import com.docta.dds.domain.usecase.node.ReplacePredecessorsUseCase
-import com.docta.dds.domain.usecase.node.ReplaceSuccessorsUseCase
+import com.docta.dds.domain.usecase.node.*
 import com.docta.dds.presentation.service.NodeService
 import com.docta.drpc.core.network.context.DrpcContext
 import com.docta.drpc.core.network.context.asRoutingContext
@@ -145,6 +139,15 @@ class NodeServiceImpl(
         return getState()
     }
 
+
+    context(ctx: DrpcContext)
+    override suspend fun startElection(): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): starting election.")
+
+        return proclaimLeaderUseCase.execute(
+            leaderId = nodeContext.getNodeIdString(), leaderAddress = nodeContext.nodeAddress, chatState = ChatState()
+        )
+    }
 
     context(ctx: DrpcContext)
     override suspend fun proclaimLeader(leaderId: String, leaderAddress: String, chatState: ChatState): SimpleResult<NodeError> {

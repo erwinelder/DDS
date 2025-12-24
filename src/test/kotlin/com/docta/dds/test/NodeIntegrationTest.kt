@@ -7,13 +7,17 @@ import com.docta.dds.config.configureStatusPages
 import com.docta.dds.di.chatModule
 import com.docta.dds.di.mainModule
 import com.docta.dds.di.nodeModule
-import com.docta.dds.domain.model.core.AppContext
 import com.docta.dds.domain.error.NodeError
-import com.docta.dds.presentation.controller.NodeRestController
+import com.docta.dds.domain.model.core.AppContext
 import com.docta.dds.domain.model.node.NodeState
+import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.drpc.core.network.context.callCatching
 import io.ktor.server.testing.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
 import org.koin.ktor.ext.get
 import kotlin.test.*
@@ -23,7 +27,9 @@ class NodeIntegrationTest {
     private suspend fun ApplicationTestBuilder.configureAndRunApplication() {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
+        withContext(Dispatchers.IO) {
+            ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
+        }
         delay(500)
     }
 
@@ -401,6 +407,110 @@ class NodeIntegrationTest {
         assertEquals(actual = node3State.leaderId, expected = expectedLeaderId)
         assertEquals(actual = node3State.leaderAddress, expected = expectedLeaderAddress)
         assertEquals(actual = node3State.isLeader, expected = node3State.nodeId == expectedLeaderId)
+    }
+
+    @Test
+    fun `simultaneous leader election on all nodes does not lead to inconsistent system state`() = testApplication {
+        configureAndRunApplication()
+
+        val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
+        val service2 = application.get<NodeRestController> { parametersOf(nodeIp2) }
+        val service3 = application.get<NodeRestController> { parametersOf(nodeIp3) }
+        val service4 = application.get<NodeRestController> { parametersOf(nodeIp4) }
+        var node1State: NodeState
+        var node2State: NodeState
+        var node3State: NodeState
+        var node4State: NodeState
+
+        callCatching { service1.join(greeterIpAddress = "") }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service2.join(greeterIpAddress = nodeIp1) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service3.join(greeterIpAddress = nodeIp2) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+        callCatching { service4.join(greeterIpAddress = nodeIp3) }.getOrThrow().apply {
+            assertNull(actual = getErrorOrNull())
+        }
+
+        val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+        val job1 = coroutineScope.launch {
+            callCatching { service1.startElection() }.getOrThrow().apply {
+                assertNull(actual = getErrorOrNull())
+            }
+        }
+        val job2 = coroutineScope.launch {
+            delay(100)
+            callCatching { service2.startElection() }.getOrThrow().apply {
+                assertNull(actual = getErrorOrNull())
+            }
+        }
+        val job3 = coroutineScope.launch {
+            delay(200)
+            callCatching { service3.startElection() }.getOrThrow().apply {
+                assertNull(actual = getErrorOrNull())
+            }
+        }
+        val job4 = coroutineScope.launch {
+            delay(300)
+            callCatching { service4.startElection() }.getOrThrow().apply {
+                assertNull(actual = getErrorOrNull())
+            }
+        }
+
+        job1.join()
+        job2.join()
+        job3.join()
+        job4.join()
+
+        callCatching { service1.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+            node1State = data
+        }
+        callCatching { service2.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+            node2State = data
+        }
+        callCatching { service3.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+            node3State = data
+        }
+        callCatching { service4.getState() }.getOrThrow().apply {
+            val data = getDataOrNull()
+            assertNotNull(actual = data)
+            node4State = data
+        }
+
+        val nodeIpToAddress = mapOf(
+            node1State.nodeId!! to node1State.nodeAddress,
+            node2State.nodeId!! to node2State.nodeAddress,
+            node3State.nodeId!! to node3State.nodeAddress,
+            node4State.nodeId!! to node4State.nodeAddress
+        )
+        val expectedLeaderId = nodeIpToAddress.keys.maxOrNull()!!
+        val expectedLeaderAddress = nodeIpToAddress[expectedLeaderId]!!
+
+        assertEquals(actual = node1State.leaderId, expected = expectedLeaderId)
+        assertEquals(actual = node1State.leaderAddress, expected = expectedLeaderAddress)
+        assertEquals(actual = node1State.isLeader, expected = node1State.nodeId == expectedLeaderId)
+
+        assertEquals(actual = node2State.leaderId, expected = expectedLeaderId)
+        assertEquals(actual = node2State.leaderAddress, expected = expectedLeaderAddress)
+        assertEquals(actual = node2State.isLeader, expected = node2State.nodeId == expectedLeaderId)
+
+        assertEquals(actual = node3State.leaderId, expected = expectedLeaderId)
+        assertEquals(actual = node3State.leaderAddress, expected = expectedLeaderAddress)
+        assertEquals(actual = node3State.isLeader, expected = node3State.nodeId == expectedLeaderId)
+
+        assertEquals(actual = node4State.leaderId, expected = expectedLeaderId)
+        assertEquals(actual = node4State.leaderAddress, expected = expectedLeaderAddress)
+        assertEquals(actual = node4State.isLeader, expected = node4State.nodeId == expectedLeaderId)
     }
 
     @Test

@@ -12,7 +12,9 @@ import com.docta.dds.presentation.controller.ChatRestController
 import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.drpc.core.network.context.callCatching
 import io.ktor.server.testing.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
 import org.koin.ktor.ext.get
 import kotlin.test.Test
@@ -25,7 +27,9 @@ class ChatIntegrationTest {
     private suspend fun ApplicationTestBuilder.configureAndRunApplication() {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
+        withContext(Dispatchers.IO) {
+            ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
+        }
         delay(500)
     }
 

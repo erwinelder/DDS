@@ -42,6 +42,9 @@ interface NodeRestController : NodeService {
         get() = "/replacePredecessors"
 
 
+    val startElectionPath: String
+        get() = "/startElection"
+
     val proclaimLeaderPath: String
         get() = "/proclaimLeader"
 

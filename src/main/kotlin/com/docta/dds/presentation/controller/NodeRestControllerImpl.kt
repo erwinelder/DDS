@@ -76,6 +76,11 @@ class NodeRestControllerImpl(
 
 
     context(ctx: DrpcContext)
+    override suspend fun startElection(): SimpleResult<NodeError> = client.callPost(
+        url = absoluteUrl + startElectionPath
+    )
+
+    context(ctx: DrpcContext)
     override suspend fun proclaimLeader(
         leaderId: String,
         leaderAddress: String,

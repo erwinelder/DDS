@@ -40,6 +40,9 @@ interface NodeService {
 
 
     context(ctx: DrpcContext)
+    suspend fun startElection(): SimpleResult<NodeError>
+
+    context(ctx: DrpcContext)
     suspend fun proclaimLeader(leaderId: String, leaderAddress: String, chatState: ChatState): SimpleResult<NodeError>
 
     context(ctx: DrpcContext)
