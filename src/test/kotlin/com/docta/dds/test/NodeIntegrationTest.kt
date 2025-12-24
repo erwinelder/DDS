@@ -38,7 +38,7 @@ class NodeIntegrationTest {
     fun `nodeState returns empty state for unregistered nodes`() = testApplication {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
         delay(500)
 
         listOf(
@@ -65,7 +65,7 @@ class NodeIntegrationTest {
     fun `nodes registration is successful`() = testApplication {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
         delay(500)
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
@@ -162,7 +162,7 @@ class NodeIntegrationTest {
     fun `new leader with max id is elected after nodes join`() = testApplication {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
         delay(500)
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
@@ -223,7 +223,7 @@ class NodeIntegrationTest {
     fun `ring recovers successfully after node death`() = testApplication {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
         delay(500)
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }
@@ -283,7 +283,7 @@ class NodeIntegrationTest {
     fun `ring reconstructs successfully after node leave`() = testApplication {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
         delay(500)
 
         val service1 = application.get<NodeRestController> { parametersOf(nodeIp1) }

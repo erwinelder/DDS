@@ -9,6 +9,7 @@ import com.docta.dds.domain.usecase.chat.BroadcastMessageRequestUseCase
 import com.docta.dds.domain.usecase.chat.BroadcastMessageUseCase
 import com.docta.dds.domain.usecase.chat.SendMessageUseCase
 import com.docta.dds.domain.error.ChatError
+import com.docta.dds.domain.model.core.AppContext
 import com.docta.dds.presentation.service.ChatService
 import com.docta.drpc.core.network.context.DrpcContext
 import com.docta.drpc.core.result.ResultData
@@ -25,12 +26,16 @@ class ChatServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun getChatHistory(): ResultData<ChatState, ChatError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): Getting chat history.")
+
         val state = chatContext.getChatState()
         return ResultData.Success(data = state)
     }
 
     context(ctx: DrpcContext)
     override suspend fun sendMessage(text: String): SimpleResult<ChatError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): Sending message '$text'.")
+
         val request = ChatMessageRequest(
             text = text,
             senderAddress = nodeContext.nodeAddress
@@ -41,6 +46,8 @@ class ChatServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun sendMessageRequest(request: ChatMessageRequest): SimpleResult<ChatError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): Received message request from ${request.senderAddress}.")
+
         if (nodeContext.isLeader) {
             broadcastMessageRequestUseCase.execute(request = request).onError { return SimpleResult.Error(it) }
         } else {
@@ -52,6 +59,8 @@ class ChatServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun broadcastMessage(message: ChatMessage): SimpleResult<ChatError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): Broadcasting message ID ${message.messageId} from ${message.senderAddress}.")
+
         if (nodeContext.isLeader) return SimpleResult.Success()
 
         return broadcastMessageUseCase.execute(message = message)

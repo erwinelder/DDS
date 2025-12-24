@@ -40,6 +40,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun getState(): ResultData<NodeState, NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): getting state.")
+
         val nodeState = NodeState(
             nodeId = nodeContext.getNodeIdStringOrNull(),
             nodeAddress = nodeContext.nodeAddress,
@@ -55,6 +57,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun setMessageDelay(delayMs: Long): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): setting message delay to $delayMs ms.")
+
         AppContext.setMessageDelay(delayMs = delayMs)
         return SimpleResult.Success()
     }
@@ -68,6 +72,8 @@ class NodeServiceImpl(
     @OptIn(ExperimentalUuidApi::class)
     context(ctx: DrpcContext)
     override suspend fun join(greeterIpAddress: String): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): joining the ring via greeter at '$greeterIpAddress'.")
+
         joinRingUseCase.execute(greeterIpAddress = greeterIpAddress.ifBlank { null })
             .onError { return SimpleResult.Error(it) }
 
@@ -87,11 +93,15 @@ class NodeServiceImpl(
         val ctx = ctx.asRoutingContext()
         val newNodeAddress = ctx.call.request.origin.remoteAddress
 
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): registering new node at address '$newNodeAddress'.")
+
         return registerNodeUseCase.execute(newNodeAddress = newNodeAddress)
     }
 
     context(ctx: DrpcContext)
     override suspend fun leave(): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): leaving the ring.")
+
         leaveRingUseCase.execute().onError { return SimpleResult.Error(it) }
 
         CoroutineScope(Dispatchers.Default).launch {
@@ -104,6 +114,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun kill(): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): killed.")
+
         CoroutineScope(Dispatchers.Default).launch {
             delay(1000)
             exitProcess(0)
@@ -114,6 +126,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun replaceSuccessors(successors: List<String>): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): replacing successors with '${successors.joinToString()}'.")
+
         if (!nodeContext.isRegistered()) return SimpleResult.Success()
         if (nodeContext.successorsEqual(other = successors)) return SimpleResult.Success()
 
@@ -122,6 +136,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun replacePredecessors(predecessors: List<String>): ResultData<NodeState, NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): replacing predecessors with '${predecessors.joinToString()}'.")
+
         if (nodeContext.predecessorsEqual(other = predecessors)) return getState()
 
         replacePredecessorsUseCase.execute(predecessors = predecessors).onError { return ResultData.Error(it) }
@@ -132,6 +148,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun proclaimLeader(leaderId: String, leaderAddress: String, chatState: ChatState): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): proclaiming leader with ID $leaderId at address '$leaderAddress', the latest chat message sequence is ${chatState.seq}.")
+
         return when {
             nodeContext.getNodeIdString() > leaderId -> proclaimLeaderUseCase.execute(
                 leaderId = nodeContext.getNodeIdString(), leaderAddress = nodeContext.nodeAddress, chatState = chatState
@@ -148,6 +166,8 @@ class NodeServiceImpl(
 
     context(ctx: DrpcContext)
     override suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): initiating loneliness protocol.")
+
         initiateLonelinessProtocolUseCase.execute()
         return SimpleResult.Success()
     }

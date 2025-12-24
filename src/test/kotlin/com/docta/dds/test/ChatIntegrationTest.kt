@@ -40,7 +40,7 @@ class ChatIntegrationTest {
     fun `sent message successfully broadcasts to each node`() = testApplication {
         configureApplication()
         startApplication()
-        ProcessBuilder("scripts/rerun_remote_docker_containers.sh").start().waitFor()
+        ProcessBuilder("scripts/restart_remote_docker_containers.sh").start().waitFor()
         delay(500)
 
         val nodeService1 = application.get<NodeRestController> { parametersOf(nodeIp1) }

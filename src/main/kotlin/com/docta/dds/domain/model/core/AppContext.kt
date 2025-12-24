@@ -13,4 +13,9 @@ object AppContext {
     var successorStateCheckInterval: Long = 5000
         private set
 
+
+    fun log(message: String) {
+        println(message)
+    }
+
 }
