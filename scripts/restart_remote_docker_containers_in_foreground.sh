@@ -3,7 +3,7 @@ set -e
 
 trap 'kill $(jobs -p)' SIGINT SIGTERM
 
-for ip in 192.168.64.3 192.168.64.4 192.168.64.5 192.168.64.6 192.168.64.7; do \
+for ip in 192.168.64.8 192.168.64.9 192.168.64.10 192.168.64.11 192.168.64.12; do \
   echo "Starting node on $ip..."
 
   ssh debian@$ip 'docker stop $(docker ps -q) || true'
