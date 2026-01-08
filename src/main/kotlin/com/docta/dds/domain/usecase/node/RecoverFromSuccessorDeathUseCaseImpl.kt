@@ -1,19 +1,18 @@
 package com.docta.dds.domain.usecase.node
 
-import com.docta.dds.domain.model.chat.ChatContext
-import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.error.NodeError
+import com.docta.dds.domain.model.node.NodeContext
+import com.docta.dds.domain.usecase.election.StartElectionUseCase
 import com.docta.drpc.core.result.SimpleResult
 import com.docta.drpc.core.result.getOrElse
 import com.docta.drpc.core.result.onError
 
 class RecoverFromSuccessorDeathUseCaseImpl(
     private val nodeContext: NodeContext,
-    private val chatContext: ChatContext,
     private val replaceSuccessorsUseCase: ReplaceSuccessorsUseCase,
     private val replacePredecessorsUseCase: ReplacePredecessorsUseCase,
     private val initiateLonelinessProtocolUseCase: InitiateLonelinessProtocolUseCase,
-    private val proclaimLeaderUseCase: ProclaimLeaderUseCase
+    private val startElectionUseCase: StartElectionUseCase
 ) : RecoverFromSuccessorDeathUseCase {
 
     override suspend fun execute(): SimpleResult<NodeError> {
@@ -34,11 +33,7 @@ class RecoverFromSuccessorDeathUseCaseImpl(
         }
 
         if (successorAddress == nodeContext.leaderAddress) {
-            proclaimLeaderUseCase.execute(
-                leaderId = nodeContext.getNodeIdString(),
-                leaderAddress = nodeContext.nodeAddress,
-                chatState = chatContext.getChatState()
-            ).onError { return SimpleResult.Error(it) }
+            startElectionUseCase.execute().onError { return SimpleResult.Error(it) }
         }
 
         return SimpleResult.Success()

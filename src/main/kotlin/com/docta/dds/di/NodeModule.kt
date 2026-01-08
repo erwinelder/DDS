@@ -1,7 +1,16 @@
 package com.docta.dds.di
 
+import com.docta.dds.domain.model.election.ElectionContext
 import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.service.NodeServiceImpl
+import com.docta.dds.domain.usecase.election.ContinueWithElectionUseCase
+import com.docta.dds.domain.usecase.election.ContinueWithElectionUseCaseImpl
+import com.docta.dds.domain.usecase.election.FinishElectionUseCase
+import com.docta.dds.domain.usecase.election.FinishElectionUseCaseImpl
+import com.docta.dds.domain.usecase.election.ProcessElectionUseCase
+import com.docta.dds.domain.usecase.election.ProcessElectionUseCaseImpl
+import com.docta.dds.domain.usecase.election.StartElectionUseCase
+import com.docta.dds.domain.usecase.election.StartElectionUseCaseImpl
 import com.docta.dds.domain.usecase.node.*
 import com.docta.dds.presentation.controller.NodeRestController
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
@@ -14,6 +23,10 @@ val nodeModule = module {
 
     single {
         NodeContext
+    }
+
+    single {
+        ElectionContext
     }
 
     /* ---------- Use Cases ---------- */
@@ -38,8 +51,7 @@ val nodeModule = module {
     single<LeaveRingUseCase> {
         LeaveRingUseCaseImpl(
             client = get(),
-            nodeContext = get(),
-            chatContext = get()
+            nodeContext = get()
         )
     }
 
@@ -59,19 +71,43 @@ val nodeModule = module {
     single<RecoverFromSuccessorDeathUseCase> {
         RecoverFromSuccessorDeathUseCaseImpl(
             nodeContext = get(),
-            chatContext = get(),
             replaceSuccessorsUseCase = get(),
             replacePredecessorsUseCase = get(),
-            proclaimLeaderUseCase = get(),
+            startElectionUseCase = get(),
             initiateLonelinessProtocolUseCase = get()
         )
     }
 
-    single<ProclaimLeaderUseCase> {
-        ProclaimLeaderUseCaseImpl(
+    single<StartElectionUseCase> {
+        StartElectionUseCaseImpl(
+            nodeContext = get(),
+            electionContext = get(),
+            continueWithElectionUseCase = get()
+        )
+    }
+
+    single<ContinueWithElectionUseCase> {
+        ContinueWithElectionUseCaseImpl(
+            client = get(),
+            nodeContext = get()
+        )
+    }
+
+    single<ProcessElectionUseCase> {
+        ProcessElectionUseCaseImpl(
             client = get(),
             nodeContext = get(),
-            chatContext = get()
+            chatContext = get(),
+            electionContext = get(),
+            continueWithElectionUseCase = get()
+        )
+    }
+
+    single<FinishElectionUseCase> {
+        FinishElectionUseCaseImpl(
+            client = get(),
+            nodeContext = get(),
+            electionContext = get()
         )
     }
 
@@ -87,7 +123,9 @@ val nodeModule = module {
             joinRingUseCase = get(),
             registerNodeUseCase = get(),
             leaveRingUseCase = get(),
-            proclaimLeaderUseCase = get(),
+            startElectionUseCase = get(),
+            processElectionUseCase = get(),
+            finishElectionUseCase = get(),
             initiateLonelinessProtocolUseCase = get(),
             replaceSuccessorsUseCase = get(),
             replacePredecessorsUseCase = get()

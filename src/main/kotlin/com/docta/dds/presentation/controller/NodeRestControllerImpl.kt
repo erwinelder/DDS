@@ -74,6 +74,11 @@ class NodeRestControllerImpl(
         predecessors.asCallParameter()
     )
 
+    context(ctx: DrpcContext)
+    override suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError> = client.callPost(
+        url = absoluteUrl + initiateLonelinessProtocolPath
+    )
+
 
     context(ctx: DrpcContext)
     override suspend fun startElection(): SimpleResult<NodeError> = client.callPost(
@@ -81,20 +86,23 @@ class NodeRestControllerImpl(
     )
 
     context(ctx: DrpcContext)
-    override suspend fun proclaimLeader(
-        leaderId: String,
-        leaderAddress: String,
-        chatState: ChatState
+    override suspend fun processElection(
+        candidateId: String
     ): SimpleResult<NodeError> = client.callPost(
-        url = absoluteUrl + proclaimLeaderPath,
-        leaderId.asCallParameter(),
-        leaderAddress.asCallParameter(),
-        chatState.asCallParameter()
+        url = absoluteUrl + processElectionPath,
+        candidateId.asCallParameter()
     )
 
     context(ctx: DrpcContext)
-    override suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError> = client.callPost(
-        url = absoluteUrl + initiateLonelinessProtocolPath
+    override suspend fun finishElection(
+        newLeaderId: String,
+        newLeaderAddress: String,
+        chatState: ChatState
+    ): SimpleResult<NodeError> = client.callPost(
+        url = absoluteUrl + finishElectionPath,
+        newLeaderId.asCallParameter(),
+        newLeaderAddress.asCallParameter(),
+        chatState.asCallParameter()
     )
 
 }

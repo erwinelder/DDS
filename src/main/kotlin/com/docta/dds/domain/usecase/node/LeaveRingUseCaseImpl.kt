@@ -2,7 +2,6 @@ package com.docta.dds.domain.usecase.node
 
 import com.docta.dds.data.utils.callSuspend
 import com.docta.dds.domain.error.NodeError
-import com.docta.dds.domain.model.chat.ChatContext
 import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.presentation.controller.NodeRestControllerImpl
 import com.docta.dds.presentation.service.NodeService
@@ -12,8 +11,7 @@ import io.ktor.client.*
 
 class LeaveRingUseCaseImpl(
     private val client: HttpClient,
-    private val nodeContext: NodeContext,
-    private val chatContext: ChatContext
+    private val nodeContext: NodeContext
 ) : LeaveRingUseCase {
 
     override suspend fun execute(): SimpleResult<NodeError> {
@@ -38,9 +36,10 @@ class LeaveRingUseCaseImpl(
             .getOrElse { return SimpleResult.Error(NodeError.ReplaceSuccessorsFailed) }
             .onError { return SimpleResult.Error(it) }
 
-        callSuspend {
-            successorService.proclaimLeader(leaderId = "", leaderAddress = "", chatState = chatContext.getChatState())
-        }.getOrElse { return SimpleResult.Error(NodeError.ProclaimLeaderFailed) }
+        if (nodeContext.isLeader) {
+            callSuspend { successorService.startElection() }
+                .getOrElse { return SimpleResult.Error(NodeError.StartElectionFailed) }
+        }
 
         return SimpleResult.Success()
     }

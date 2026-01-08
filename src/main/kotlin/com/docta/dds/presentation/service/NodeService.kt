@@ -38,14 +38,17 @@ interface NodeService {
     context(ctx: DrpcContext)
     suspend fun replacePredecessors(predecessors: List<String>): ResultData<NodeState, NodeError>
 
+    context(ctx: DrpcContext)
+    suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError>
+
 
     context(ctx: DrpcContext)
     suspend fun startElection(): SimpleResult<NodeError>
 
     context(ctx: DrpcContext)
-    suspend fun proclaimLeader(leaderId: String, leaderAddress: String, chatState: ChatState): SimpleResult<NodeError>
+    suspend fun processElection(candidateId: String): SimpleResult<NodeError>
 
     context(ctx: DrpcContext)
-    suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError>
+    suspend fun finishElection(newLeaderId: String, newLeaderAddress: String, chatState: ChatState): SimpleResult<NodeError>
 
 }

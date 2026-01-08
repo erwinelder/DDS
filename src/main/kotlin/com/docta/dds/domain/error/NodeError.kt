@@ -10,7 +10,7 @@ sealed class NodeError : Error {
     @Serializable object InitiateLonelinessProtocolFailed : NodeError()
     @Serializable object ReplaceSuccessorsFailed : NodeError()
     @Serializable object ReplacePredecessorsFailed : NodeError()
-    @Serializable object ProclaimLeaderFailed : NodeError()
+    @Serializable object StartElectionFailed : NodeError()
 
     @Serializable object NodeIsAlreadyRegistered : NodeError()
     @Serializable object NodeIsNotRegisteredYet : NodeError()

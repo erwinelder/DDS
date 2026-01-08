@@ -41,14 +41,17 @@ interface NodeRestController : NodeService {
     val replacePredecessorsPath: String
         get() = "/replacePredecessors"
 
+    val initiateLonelinessProtocolPath: String
+        get() = "/initiateLonelinessProtocol"
+
 
     val startElectionPath: String
         get() = "/startElection"
 
-    val proclaimLeaderPath: String
-        get() = "/proclaimLeader"
+    val processElectionPath: String
+        get() = "/processElection"
 
-    val initiateLonelinessProtocolPath: String
-        get() = "/initiateLonelinessProtocol"
+    val finishElectionPath: String
+        get() = "/finishElection"
 
 }

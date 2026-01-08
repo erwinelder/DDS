@@ -6,6 +6,9 @@ import com.docta.dds.domain.model.core.AppContext
 import com.docta.dds.domain.model.node.NodeContext
 import com.docta.dds.domain.model.node.NodeState
 import com.docta.dds.domain.model.node.RegistrationState
+import com.docta.dds.domain.usecase.election.FinishElectionUseCase
+import com.docta.dds.domain.usecase.election.ProcessElectionUseCase
+import com.docta.dds.domain.usecase.election.StartElectionUseCase
 import com.docta.dds.domain.usecase.node.*
 import com.docta.dds.presentation.service.NodeService
 import com.docta.drpc.core.network.context.DrpcContext
@@ -26,7 +29,9 @@ class NodeServiceImpl(
     private val joinRingUseCase: JoinRingUseCase,
     private val registerNodeUseCase: RegisterNodeUseCase,
     private val leaveRingUseCase: LeaveRingUseCase,
-    private val proclaimLeaderUseCase: ProclaimLeaderUseCase,
+    private val startElectionUseCase: StartElectionUseCase,
+    private val processElectionUseCase: ProcessElectionUseCase,
+    private val finishElectionUseCase: FinishElectionUseCase,
     private val initiateLonelinessProtocolUseCase: InitiateLonelinessProtocolUseCase,
     private val replaceSuccessorsUseCase: ReplaceSuccessorsUseCase,
     private val replacePredecessorsUseCase: ReplacePredecessorsUseCase
@@ -72,11 +77,7 @@ class NodeServiceImpl(
             .onError { return SimpleResult.Error(it) }
 
         if (nodeContext.getNodeId() > nodeContext.getLeaderId()) {
-            proclaimLeaderUseCase.execute(
-                leaderId = nodeContext.getNodeIdString(),
-                leaderAddress = nodeContext.nodeAddress,
-                chatState = ChatState()
-            ).onError { return SimpleResult.Error(it) }
+            startElectionUseCase.execute().onError { return SimpleResult.Error(it) }
         }
 
         return SimpleResult.Success()
@@ -139,40 +140,42 @@ class NodeServiceImpl(
         return getState()
     }
 
-
-    context(ctx: DrpcContext)
-    override suspend fun startElection(): SimpleResult<NodeError> {
-        AppContext.log(message = "Node (${nodeContext.nodeAddress}): starting election.")
-
-        return proclaimLeaderUseCase.execute(
-            leaderId = nodeContext.getNodeIdString(), leaderAddress = nodeContext.nodeAddress, chatState = ChatState()
-        )
-    }
-
-    context(ctx: DrpcContext)
-    override suspend fun proclaimLeader(leaderId: String, leaderAddress: String, chatState: ChatState): SimpleResult<NodeError> {
-        AppContext.log(message = "Node (${nodeContext.nodeAddress}): proclaiming leader with ID $leaderId at address '$leaderAddress', the latest chat message sequence is ${chatState.seq}.")
-
-        return when {
-            nodeContext.getNodeIdString() > leaderId -> proclaimLeaderUseCase.execute(
-                leaderId = nodeContext.getNodeIdString(), leaderAddress = nodeContext.nodeAddress, chatState = chatState
-            )
-            nodeContext.getNodeIdString() < leaderId -> proclaimLeaderUseCase.execute(
-                leaderId = leaderId, leaderAddress = leaderAddress, chatState = chatState
-            )
-            else -> {
-                nodeContext.proclaimAsLeader()
-                SimpleResult.Success()
-            }
-        }
-    }
-
     context(ctx: DrpcContext)
     override suspend fun initiateLonelinessProtocol(): SimpleResult<NodeError> {
         AppContext.log(message = "Node (${nodeContext.nodeAddress}): initiating loneliness protocol.")
 
         initiateLonelinessProtocolUseCase.execute()
         return SimpleResult.Success()
+    }
+
+
+    context(ctx: DrpcContext)
+    override suspend fun startElection(): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): starting election.")
+
+        return startElectionUseCase.execute()
+    }
+
+    context(ctx: DrpcContext)
+    override suspend fun processElection(candidateId: String): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): processing election for candidate with ID $candidateId.")
+
+        return processElectionUseCase.execute(candidateId = candidateId)
+    }
+
+    context(ctx: DrpcContext)
+    override suspend fun finishElection(
+        newLeaderId: String,
+        newLeaderAddress: String,
+        chatState: ChatState
+    ): SimpleResult<NodeError> {
+        AppContext.log(message = "Node (${nodeContext.nodeAddress}): finishing election for new leader with ID $newLeaderId at address '$newLeaderAddress', the latest chat message sequence is ${chatState.seq}.")
+
+        return finishElectionUseCase.execute(
+            newLeaderId = newLeaderId,
+            newLeaderAddress = newLeaderAddress,
+            chatState = chatState
+        )
     }
 
 }

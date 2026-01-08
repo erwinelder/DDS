@@ -49,17 +49,21 @@ fun Routing.configureNodeRouting(
             service.replacePredecessors(predecessors = get(0))
         }
 
+        processPostRoute(restController.initiateLonelinessProtocolPath) {
+            service.initiateLonelinessProtocol()
+        }
+
 
         processPostRoute(restController.startElectionPath) {
             service.startElection()
         }
 
-        processPostRoute(restController.proclaimLeaderPath) {
-            service.proclaimLeader(leaderId = get(0), leaderAddress = get(1), chatState = get(2))
+        processPostRoute(restController.processElectionPath) {
+            service.processElection(candidateId = get(0))
         }
 
-        processPostRoute(restController.initiateLonelinessProtocolPath) {
-            service.initiateLonelinessProtocol()
+        processPostRoute(restController.finishElectionPath) {
+            service.finishElection(newLeaderId = get(0), newLeaderAddress = get(1), chatState = get(2))
         }
 
     }

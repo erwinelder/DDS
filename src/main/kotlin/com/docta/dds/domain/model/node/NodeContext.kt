@@ -13,6 +13,11 @@ object NodeContext {
 
     fun initializeNodeId() {
         if (nodeUuid == null) nodeUuid = Uuid.random()
+//        if (nodeUuid == null) nodeUuid = Uuid.parse(
+//            uuidString = "00000000-0000-0000-0000-0000000000" +
+//                    "0".takeIf { nodeAddress.substringAfterLast('.').length == 1 }.orEmpty() +
+//                    nodeAddress.substringAfterLast('.')
+//        )
     }
     fun getNodeId(): Uuid = nodeUuid
         ?: throw IllegalStateException("Node ID is null for node $nodeAddress")

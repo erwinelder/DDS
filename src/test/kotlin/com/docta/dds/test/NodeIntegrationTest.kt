@@ -42,11 +42,11 @@ class NodeIntegrationTest {
         }
     }
 
-    val nodeIp1 = "192.168.64.3"
-    val nodeIp2 = "192.168.64.4"
-    val nodeIp3 = "192.168.64.5"
-    val nodeIp4 = "192.168.64.6"
-    val nodeIp5 = "192.168.64.7"
+    val nodeIp1 = "192.168.64.8"
+    val nodeIp2 = "192.168.64.9"
+    val nodeIp3 = "192.168.64.10"
+    val nodeIp4 = "192.168.64.11"
+    val nodeIp5 = "192.168.64.12"
 
 
     @Test

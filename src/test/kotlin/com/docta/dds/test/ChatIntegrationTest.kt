@@ -42,9 +42,9 @@ class ChatIntegrationTest {
         }
     }
 
-    val nodeIp1 = "192.168.64.3"
-    val nodeIp2 = "192.168.64.4"
-    val nodeIp3 = "192.168.64.5"
+    val nodeIp1 = "192.168.64.8"
+    val nodeIp2 = "192.168.64.9"
+    val nodeIp3 = "192.168.64.10"
 
 
     @Test
