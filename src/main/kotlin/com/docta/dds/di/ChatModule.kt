@@ -53,7 +53,8 @@ val chatModule = module {
             chatContext = get(),
             sendMessageUseCase = get(),
             broadcastMessageRequestUseCase = get(),
-            broadcastMessageUseCase = get()
+            broadcastMessageUseCase = get(),
+            recoverFromSuccessorDeathUseCase = get()
         )
     }
     factory<ChatRestController> { params ->
